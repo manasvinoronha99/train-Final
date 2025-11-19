@@ -462,54 +462,75 @@ class SceneManager {
     }
 
     initialize() {
+        console.log('Initializing scene manager...');
+
         // Initialize canvas renderers
-        this.renderers['bw-cabin'] = new CabinRenderer(
-            document.getElementById('bw-cabin-canvas'),
-            'grayscale'
-        );
-        this.renderers['bw-cabin'].draw();
+        try {
+            this.renderers['bw-cabin'] = new CabinRenderer(
+                document.getElementById('bw-cabin-canvas'),
+                'grayscale'
+            );
+            this.renderers['bw-cabin'].draw();
+            console.log('BW cabin renderer initialized');
 
-        this.renderers['color-intro'] = new CabinRenderer(
-            document.getElementById('color-cabin-canvas'),
-            'color'
-        );
-        this.renderers['color-intro'].draw();
+            this.renderers['color-intro'] = new CabinRenderer(
+                document.getElementById('color-cabin-canvas'),
+                'color'
+            );
+            this.renderers['color-intro'].draw();
+            console.log('Color intro renderer initialized');
 
-        this.renderers['interaction-types'] = new CabinRenderer(
-            document.getElementById('types-cabin-canvas'),
-            'color'
-        );
-        this.renderers['interaction-types'].draw();
+            this.renderers['interaction-types'] = new CabinRenderer(
+                document.getElementById('types-cabin-canvas'),
+                'color'
+            );
+            this.renderers['interaction-types'].draw();
+            console.log('Interaction types renderer initialized');
 
-        this.renderers.interactive = new CabinRenderer(
-            document.getElementById('main-cabin-canvas'),
-            'interactive'
-        );
-        this.renderers.interactive.initializePassengers();
-        this.renderers.interactive.draw();
+            this.renderers.interactive = new CabinRenderer(
+                document.getElementById('main-cabin-canvas'),
+                'interactive'
+            );
+            this.renderers.interactive.initializePassengers();
+            this.renderers.interactive.draw();
+            console.log('Interactive renderer initialized');
+        } catch (error) {
+            console.error('Canvas rendering error:', error);
+        }
 
-        // Start progression
+        // Start progression regardless of canvas issues
+        console.log('Starting scene progression...');
         this.startProgression();
     }
 
     startProgression() {
+        console.log('Scene progression scheduled:');
+        console.log('- Darkness -> BW Cabin at', SCENES.darkness.duration, 'ms');
+        console.log('- BW Cabin -> Color at', SCENES.darkness.duration + SCENES['bw-cabin'].duration, 'ms');
+        console.log('- Color -> Interaction Types at', SCENES.darkness.duration + SCENES['bw-cabin'].duration + SCENES['color-intro'].duration, 'ms');
+        console.log('- Interaction Types -> Interactive at', SCENES.darkness.duration + SCENES['bw-cabin'].duration + SCENES['color-intro'].duration + SCENES['interaction-types'].duration, 'ms');
+
         // Scene 1: Darkness (6 seconds)
         setTimeout(() => {
+            console.log('Transitioning: darkness -> bw-cabin');
             this.transition('darkness', 'bw-cabin');
         }, SCENES.darkness.duration);
 
         // Scene 2: B&W Cabin (4 seconds after scene 1)
         setTimeout(() => {
+            console.log('Transitioning: bw-cabin -> color-intro');
             this.transition('bw-cabin', 'color-intro');
         }, SCENES.darkness.duration + SCENES['bw-cabin'].duration);
 
         // Scene 3: Color intro (4 seconds after scene 2)
         setTimeout(() => {
+            console.log('Transitioning: color-intro -> interaction-types');
             this.transition('color-intro', 'interaction-types');
         }, SCENES.darkness.duration + SCENES['bw-cabin'].duration + SCENES['color-intro'].duration);
 
         // Scene 4: Interaction types (5 seconds after scene 3)
         setTimeout(() => {
+            console.log('Transitioning: interaction-types -> interactive');
             this.transition('interaction-types', 'interactive');
             // Enable interactive features
             interactionSystem.enable();
@@ -517,9 +538,15 @@ class SceneManager {
     }
 
     transition(fromScene, toScene) {
+        console.log(`Transition executing: ${fromScene} -> ${toScene}`);
+        console.log('From element:', this.scenes[fromScene]);
+        console.log('To element:', this.scenes[toScene]);
+
         this.scenes[fromScene].classList.remove('active');
         this.scenes[toScene].classList.add('active');
         STATE.current = toScene;
+
+        console.log('Transition complete');
     }
 }
 
@@ -712,9 +739,13 @@ let sceneManager;
 let interactionSystem;
 
 window.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM Content Loaded - Starting initialization');
+
     sceneManager = new SceneManager();
     sceneManager.initialize();
 
     // Initialize interaction system (will be enabled after storyboard sequence)
     interactionSystem = new InteractionSystem(sceneManager.renderers.interactive);
+
+    console.log('Initialization complete');
 });
