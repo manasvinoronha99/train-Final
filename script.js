@@ -74,172 +74,169 @@ const endings = {
 let currentSceneIndex = 0;
 let choiceScores = { good: 0, bad: 0, neutral: 0 };
 
-// Canvas and rendering
-const canvas = document.getElementById('cabin-canvas');
-const ctx = canvas.getContext('2d');
-let passengers = [];
+// Passenger brightness tracking (0 = darkest, 1 = brightest)
+let passengerBrightness = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5];
 
-// Resize canvas
-function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    drawCabin();
-}
+// Canvas setup
+const c = document.getElementById("scene");
+const ctx = c.getContext("2d");
 
-// Draw 1-point perspective train cabin
-function drawCabin() {
-    const w = canvas.width;
-    const h = canvas.height;
-    const cx = w / 2;
-    const cy = h / 2;
+// Draw the train cabin (using exact code from user's HTML)
+function draw() {
+    ctx.clearRect(0, 0, c.width, c.height);
 
-    // Clear
-    ctx.fillStyle = '#1e2430';
-    ctx.fillRect(0, 0, w, h);
+    // Colors extracted from the image
+    const wall = "#3f415e";
+    const darkerWall = "#2d2f4a";
+    const bench = "#15172d";
+    const metal = "#0d0d0d";
+    const light = "#c7c7aa";
 
-    // Vanishing point door at center
-    ctx.fillStyle = '#2e3440';
-    ctx.fillRect(cx - 40, cy - 80, 80, 120);
-    ctx.strokeStyle = '#3a3f48';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(cx - 40, cy - 80, 80, 120);
+    // Background walls
+    ctx.fillStyle = wall;
+    ctx.fillRect(0, 0, c.width, c.height);
 
-    // Floor (aisle)
-    ctx.beginPath();
-    ctx.moveTo(0, h);
-    ctx.lineTo(w, h);
-    ctx.lineTo(cx + 100, cy + h * 0.15);
-    ctx.lineTo(cx - 100, cy + h * 0.15);
-    ctx.closePath();
-    ctx.fillStyle = '#1a1f28';
-    ctx.fill();
-
-    // Ceiling
+    // Side angled walls (diagonals)
+    ctx.fillStyle = darkerWall;
     ctx.beginPath();
     ctx.moveTo(0, 0);
-    ctx.lineTo(w, 0);
-    ctx.lineTo(cx + 100, cy - h * 0.15);
-    ctx.lineTo(cx - 100, cy - h * 0.15);
+    ctx.lineTo(0, 900);
+    ctx.lineTo(800, 450);
     ctx.closePath();
-    ctx.fillStyle = '#2a3040';
     ctx.fill();
+
+    ctx.beginPath();
+    ctx.moveTo(1600, 0);
+    ctx.lineTo(1600, 900);
+    ctx.lineTo(800, 450);
+    ctx.closePath();
+    ctx.fill();
+
+    // Floor
+    ctx.fillStyle = "#3d3f5a";
+    ctx.fillRect(0, 450, 1600, 450);
+
+    // Benches
+    ctx.fillStyle = bench;
+    ctx.beginPath();
+    ctx.moveTo(0, 450);
+    ctx.lineTo(800, 650);
+    ctx.lineTo(800, 900);
+    ctx.lineTo(0, 900);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.moveTo(1600, 450);
+    ctx.lineTo(800, 650);
+    ctx.lineTo(800, 900);
+    ctx.lineTo(1600, 900);
+    ctx.closePath();
+    ctx.fill();
+
+    // Vertical poles
+    ctx.strokeStyle = metal;
+    ctx.lineWidth = 10;
+
+    const poleXs = [230, 430, 630, 970, 1170, 1370];
+    poleXs.forEach(x => {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, 900);
+        ctx.stroke();
+    });
+
+    // Angled ceiling rails
+    ctx.lineWidth = 8;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(1600, 450);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(1600, 0);
+    ctx.lineTo(0, 450);
+    ctx.stroke();
 
     // Ceiling lights
-    for (let i = 0; i < 6; i++) {
-        const lightY = cy - h * 0.15 + (h * 0.3 * i / 5);
-        const lightX = cx;
-        const lightSize = 40 - (i * 5);
-
-        const gradient = ctx.createRadialGradient(lightX, lightY, 0, lightX, lightY, lightSize);
-        gradient.addColorStop(0, 'rgba(106, 123, 168, 0.6)');
-        gradient.addColorStop(1, 'transparent');
-        ctx.fillStyle = gradient;
-        ctx.fillRect(lightX - lightSize, lightY - lightSize/2, lightSize * 2, lightSize);
-    }
-
-    // Left seats
-    for (let i = 0; i < 3; i++) {
-        const depth = 0.8 - (i * 0.2);
-        const x = w * (0.15 + i * 0.05);
-        const y = h * (0.4 + i * 0.1);
-        const size = 60 * depth;
-
-        ctx.fillStyle = '#2e3540';
-        ctx.fillRect(x - size/2, y, size, size * 0.8);
-    }
-
-    // Right seats
-    for (let i = 0; i < 3; i++) {
-        const depth = 0.8 - (i * 0.2);
-        const x = w * (0.85 - i * 0.05);
-        const y = h * (0.4 + i * 0.1);
-        const size = 60 * depth;
-
-        ctx.fillStyle = '#2e3540';
-        ctx.fillRect(x - size/2, y, size, size * 0.8);
-    }
-
-    // Windows
-    const windows = [
-        { x: 0.1, y: 0.25, w: 70, h: 90 },
-        { x: 0.15, y: 0.35, w: 60, h: 80 },
-        { x: 0.9, y: 0.25, w: 70, h: 90 },
-        { x: 0.85, y: 0.35, w: 60, h: 80 }
+    const lights = [
+        { x: 800, y: 90, r: 65 },
+        { x: 800, y: 200, r: 55 },
+        { x: 800, y: 310, r: 45 },
+        { x: 800, y: 410, r: 25 }
     ];
 
-    windows.forEach(win => {
-        ctx.fillStyle = '#3e4450';
-        ctx.fillRect(w * win.x - win.w/2, h * win.y, win.w, win.h);
-        ctx.strokeStyle = '#505865';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(w * win.x - win.w/2, h * win.y, win.w, win.h);
+    ctx.fillStyle = light;
+    lights.forEach(l => {
+        ctx.beginPath();
+        ctx.ellipse(l.x, l.y, l.r, l.r * 0.55, 0, 0, Math.PI * 2);
+        ctx.fill();
     });
 
-    // Draw passengers
-    passengers.forEach(p => {
-        drawPassenger(p.x, p.y, p.scale, p.brightness);
-    });
-}
-
-// Draw passenger silhouette
-function drawPassenger(x, y, scale, brightness) {
-    const baseColor = interpolateColor('#4a4f58', '#6a7080', brightness);
-
-    // Head
-    const headRadius = 25 * scale;
-    const gradient = ctx.createRadialGradient(x, y - 40 * scale, 0, x, y - 40 * scale, headRadius);
-    gradient.addColorStop(0, baseColor);
-    gradient.addColorStop(1, adjustBrightness(baseColor, -0.2));
-
-    ctx.fillStyle = gradient;
+    // Back door
+    ctx.fillStyle = "#000";
     ctx.beginPath();
-    ctx.arc(x, y - 40 * scale, headRadius, 0, Math.PI * 2);
+    ctx.moveTo(760, 350);
+    ctx.lineTo(840, 350);
+    ctx.lineTo(840, 550);
+    ctx.lineTo(760, 550);
+    ctx.closePath();
     ctx.fill();
 
-    // Body
-    ctx.fillStyle = baseColor;
+    // Door light dot
+    ctx.fillStyle = "#e8e6a5";
     ctx.beginPath();
-    ctx.ellipse(x, y + 10 * scale, 35 * scale, 50 * scale, 0, 0, Math.PI * 2);
+    ctx.arc(800, 460, 8, 0, Math.PI * 2);
     ctx.fill();
+
+    // Draw passengers with dynamic brightness
+    // Left side
+    passenger(180, 600, 1.1, 0.1, passengerBrightness[0]);
+    passenger(400, 550, 0.7, 0.1, passengerBrightness[1]);
+    passenger(615, 520, 0.45, 0, passengerBrightness[2]);
+
+    // Right side
+    passenger(1420, 600, 1.1, -0.1, passengerBrightness[3]);
+    passenger(1200, 550, 0.7, -0.1, passengerBrightness[4]);
+    passenger(985, 520, 0.45, 0, passengerBrightness[5]);
 }
 
-function interpolateColor(color1, color2, factor) {
-    const c1 = hexToRgb(color1);
-    const c2 = hexToRgb(color2);
-    const r = Math.round(c1.r + (c2.r - c1.r) * factor);
-    const g = Math.round(c1.g + (c2.g - c1.g) * factor);
-    const b = Math.round(c1.b + (c2.b - c1.b) * factor);
-    return `rgb(${r}, ${g}, ${b})`;
-}
+// Function to draw simplified passengers with brightness control
+function passenger(x, y, scale = 1, lean = 0, brightness = 0.5) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(scale, scale);
+    ctx.rotate(lean);
 
-function hexToRgb(hex) {
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? {
-        r: parseInt(result[1], 16),
-        g: parseInt(result[2], 16),
-        b: parseInt(result[3], 16)
-    } : { r: 0, g: 0, b: 0 };
-}
+    // Calculate color based on brightness (darker to lighter)
+    const baseGray = Math.floor(100 + (brightness * 155)); // 100-255 range
+    const figureColor = `rgb(${baseGray}, ${baseGray}, ${baseGray})`;
 
-function adjustBrightness(color, amount) {
-    const rgb = color.match(/\d+/g).map(Number);
-    const adjusted = rgb.map(val => Math.max(0, Math.min(255, val + amount * 255)));
-    return `rgb(${adjusted[0]}, ${adjusted[1]}, ${adjusted[2]})`;
-}
+    // head
+    ctx.fillStyle = figureColor;
+    ctx.beginPath();
+    ctx.arc(0, -120, 35, 0, Math.PI * 2);
+    ctx.fill();
 
-// Initialize passengers
-function initPassengers() {
-    const w = canvas.width;
-    const h = canvas.height;
+    // body
+    ctx.beginPath();
+    ctx.moveTo(-20, -80);
+    ctx.lineTo(20, -80);
+    ctx.lineTo(40, 80);
+    ctx.lineTo(-40, 80);
+    ctx.closePath();
+    ctx.fill();
 
-    passengers = [
-        { id: 1, x: w * 0.18, y: h * 0.5, scale: 0.8, brightness: 0.5 },
-        { id: 2, x: w * 0.25, y: h * 0.6, scale: 0.6, brightness: 0.5 },
-        { id: 3, x: w * 0.82, y: h * 0.5, scale: 0.8, brightness: 0.5 },
-        { id: 4, x: w * 0.75, y: h * 0.6, scale: 0.6, brightness: 0.5 },
-        { id: 5, x: w * 0.35, y: h * 0.7, scale: 0.4, brightness: 0.5 },
-        { id: 6, x: w * 0.65, y: h * 0.7, scale: 0.4, brightness: 0.5 }
-    ];
+    // legs
+    ctx.beginPath();
+    ctx.moveTo(-20, 80);
+    ctx.lineTo(-5, 160);
+    ctx.lineTo(15, 160);
+    ctx.lineTo(5, 80);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.restore();
 }
 
 // DOM Elements
@@ -285,13 +282,17 @@ function handleChoice(choice) {
     choiceScores[choice.value]++;
 
     // Update passenger brightness based on choice
-    if (currentSceneIndex < passengers.length) {
+    // Each scene corresponds to a passenger (scenes 1-6 map to passengers 0-5)
+    const passengerIndex = currentSceneIndex - 1; // Subtract 1 because intro is scene 0
+
+    if (passengerIndex >= 0 && passengerIndex < passengerBrightness.length) {
         if (choice.value === 'good') {
-            passengers[currentSceneIndex].brightness = Math.min(0.9, passengers[currentSceneIndex].brightness + 0.25);
+            passengerBrightness[passengerIndex] = Math.min(1.0, passengerBrightness[passengerIndex] + 0.3);
         } else if (choice.value === 'bad') {
-            passengers[currentSceneIndex].brightness = Math.max(0.15, passengers[currentSceneIndex].brightness - 0.25);
+            passengerBrightness[passengerIndex] = Math.max(0.1, passengerBrightness[passengerIndex] - 0.3);
         }
-        drawCabin();
+        // Neutral doesn't change brightness
+        draw(); // Redraw with new brightness
     }
 
     currentSceneIndex++;
@@ -374,10 +375,10 @@ function updateEnvironmentByChoices() {
 function restart() {
     currentSceneIndex = 0;
     choiceScores = { good: 0, bad: 0, neutral: 0 };
+    passengerBrightness = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5];
     continueBtn.textContent = 'Continue';
 
-    initPassengers();
-    drawCabin();
+    draw();
 
     trainCabin.classList.remove(
         'env-lighter-1', 'env-lighter-2', 'env-lighter-3',
@@ -389,11 +390,7 @@ function restart() {
 
 // Initialize
 window.addEventListener('DOMContentLoaded', () => {
-    resizeCanvas();
-    initPassengers();
-    drawCabin();
+    draw();
     showScene(narrative[0]);
-
     continueBtn.addEventListener('click', handleContinue);
-    window.addEventListener('resize', resizeCanvas);
 });
