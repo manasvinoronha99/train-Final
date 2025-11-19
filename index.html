@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cabin Narrative - Interactive Prototype</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Scene Container -->
+        <div id="scene-container">
+            <!-- Background layers -->
+            <div class="cabin-bg" id="cabin-bg">
+                <div class="ceiling"></div>
+                <div class="left-wall">
+                    <div class="wall-panel"></div>
+                    <div class="wall-panel"></div>
+                    <div class="wall-panel"></div>
+                    <div class="wall-panel"></div>
+                </div>
+                <div class="right-wall">
+                    <div class="wall-panel"></div>
+                    <div class="wall-panel"></div>
+                    <div class="wall-panel"></div>
+                    <div class="wall-panel"></div>
+                </div>
+                <div class="floor"></div>
+
+                <!-- Ceiling lights -->
+                <div class="ceiling-light light-1"></div>
+                <div class="ceiling-light light-2"></div>
+                <div class="ceiling-light light-3"></div>
+
+                <!-- Flames/Torches (hidden initially) -->
+                <div class="flame flame-left-1"></div>
+                <div class="flame flame-left-2"></div>
+                <div class="flame flame-right-1"></div>
+                <div class="flame flame-right-2"></div>
+
+                <!-- Atmospheric overlay -->
+                <div class="atmosphere"></div>
+            </div>
+
+            <!-- Dialogue/Choice Interface -->
+            <div id="dialogue-box" class="dialogue-box">
+                <div class="dialogue-content">
+                    <p id="dialogue-text">This cabin has collapsed into darkness</p>
+                    <div id="choices" class="choices hidden">
+                        <button class="choice-btn" data-path="variety">Option 1: User chooses variety of responses</button>
+                        <button class="choice-btn" data-path="good">Option 2: User chooses only good responses</button>
+                        <button class="choice-btn" data-path="bad">Option 3: User chooses only bad responses</button>
+                    </div>
+                    <button id="continue-btn" class="continue-btn">Continue</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Debug info (can be hidden) -->
+        <div id="debug-info" class="debug-info">
+            <p>Current Scene: <span id="current-scene">intro</span></p>
+            <p>Path: <span id="current-path">none</span></p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
