@@ -3,104 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Train Cabin - Interactive Narrative</title>
+    <title>Train Cabin Narrative</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div id="app">
-        <!-- Train Cabin Scene -->
-        <div id="train-cabin">
-            <!-- Background and atmosphere -->
-            <div class="atmosphere-overlay"></div>
+    <!-- Main container for entire experience -->
+    <div id="experience-container">
 
-            <!-- Windows - Left Side -->
-            <div class="window-row left-windows">
-                <div class="window"></div>
-                <div class="window"></div>
-                <div class="window"></div>
-                <div class="window"></div>
-            </div>
+        <!-- SCENE 1: Cabin collapses into darkness -->
+        <div id="scene-darkness" class="scene active">
+            <div class="darkness-overlay"></div>
+            <p class="darkness-text">This cabin has collapsed into darkness</p>
+        </div>
 
-            <!-- Windows - Right Side -->
-            <div class="window-row right-windows">
-                <div class="window"></div>
-                <div class="window"></div>
-                <div class="window"></div>
-                <div class="window"></div>
-            </div>
+        <!-- SCENE 2: Black-and-white cabin interior -->
+        <div id="scene-bw-cabin" class="scene">
+            <canvas id="bw-cabin-canvas"></canvas>
+            <p class="scene-caption">Black and White → Cabin Interior</p>
+        </div>
 
-            <!-- Ceiling with lights -->
-            <div class="ceiling-section">
-                <div class="ceiling-light"></div>
-                <div class="ceiling-light"></div>
-                <div class="ceiling-light"></div>
-                <div class="ceiling-light"></div>
-                <div class="ceiling-light"></div>
-                <div class="ceiling-light"></div>
-                <div class="ceiling-panel center-panel"></div>
-            </div>
+        <!-- SCENE 3: Interior with initial subtle coloring -->
+        <div id="scene-color-intro" class="scene">
+            <canvas id="color-cabin-canvas"></canvas>
+            <p class="scene-caption">Interior with initial start coloring</p>
+        </div>
 
-            <!-- Floor/Aisle -->
-            <div class="floor-aisle"></div>
-
-            <!-- Passenger Silhouettes -->
-            <div class="passengers">
-                <!-- Left side passengers -->
-                <div class="passenger left-side p-1" data-seat="left-1">
-                    <div class="passenger-head"></div>
-                    <div class="passenger-body"></div>
+        <!-- SCENE 4: Representation of interaction types (visual only, not interactive) -->
+        <div id="scene-interaction-types" class="scene">
+            <canvas id="types-cabin-canvas"></canvas>
+            <div class="interaction-type-overlay">
+                <div class="type-box type-variety">
+                    <p>Variety of possible responses</p>
                 </div>
-                <div class="passenger left-side p-2" data-seat="left-2">
-                    <div class="passenger-head"></div>
-                    <div class="passenger-body"></div>
+                <div class="type-box type-good">
+                    <p>Only good responses</p>
                 </div>
-
-                <!-- Center passengers -->
-                <div class="passenger center p-3" data-seat="center-1">
-                    <div class="passenger-head"></div>
-                    <div class="passenger-body"></div>
+                <div class="type-box type-bad">
+                    <p>Only bad responses</p>
                 </div>
-                <div class="passenger center p-4" data-seat="center-2">
-                    <div class="passenger-head"></div>
-                    <div class="passenger-body"></div>
-                </div>
-
-                <!-- Right side passengers -->
-                <div class="passenger right-side p-5" data-seat="right-1">
-                    <div class="passenger-head"></div>
-                    <div class="passenger-body"></div>
-                </div>
-                <div class="passenger right-side p-6" data-seat="right-2">
-                    <div class="passenger-head"></div>
-                    <div class="passenger-body"></div>
-                </div>
-            </div>
-
-            <!-- Door/End of cabin -->
-            <div class="cabin-door"></div>
-
-            <!-- Flame elements (hidden initially) -->
-            <div class="flames-container">
-                <div class="flame flame-1"></div>
-                <div class="flame flame-2"></div>
-                <div class="flame flame-3"></div>
-                <div class="flame flame-4"></div>
             </div>
         </div>
 
-        <!-- Dialogue Interface (Left-aligned) -->
-        <div id="dialogue-interface">
-            <div class="dialogue-content">
-                <p id="narrative-text" class="narrative-text">This cabin has collapsed into darkness</p>
-                <p id="question-text" class="question-text"></p>
+        <!-- MAIN INTERACTIVE SCENE: Full cabin with hoverable passengers -->
+        <div id="scene-interactive" class="scene">
+            <canvas id="main-cabin-canvas"></canvas>
 
-                <div id="choices-container" class="choices-container hidden">
-                    <!-- Choices will be dynamically inserted here -->
+            <!-- Passenger interaction areas (invisible, hover-detectable) -->
+            <div id="passengers-container">
+                <!-- Passengers will be dynamically positioned -->
+            </div>
+
+            <!-- Cloud-like dialogue bubble (hidden by default) -->
+            <div id="dialogue-bubble" class="dialogue-bubble hidden">
+                <div class="bubble-content">
+                    <p class="bubble-background"></p>
+                    <p class="bubble-question"></p>
+                    <div class="bubble-choices">
+                        <button class="choice-option" data-value="positive"></button>
+                        <button class="choice-option" data-value="neutral"></button>
+                        <button class="choice-option" data-value="negative"></button>
+                    </div>
                 </div>
-
-                <button id="continue-btn" class="continue-btn">Continue</button>
             </div>
         </div>
+
     </div>
 
     <script src="script.js"></script>

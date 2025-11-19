@@ -1,4 +1,8 @@
-/* Reset and Base Styles */
+/* ============================================
+   GLOBAL STYLES
+   Dark, dreamlike, atmospheric tone
+   ============================================ */
+
 * {
     margin: 0;
     padding: 0;
@@ -6,515 +10,381 @@
 }
 
 body {
-    font-family: 'Georgia', 'Times New Roman', serif;
+    font-family: 'Crimson Text', 'Georgia', serif;
+    background: #000;
     overflow: hidden;
-    background: #0a0e1a;
-    color: #e8e8e8;
+    cursor: default;
 }
 
-/* App Container */
-#app {
+#experience-container {
     width: 100vw;
     height: 100vh;
     position: relative;
-    overflow: hidden;
-    perspective: 1200px;
+    background: #0a0e1a;
 }
 
-/* Train Cabin Main Container */
-#train-cabin {
+/* ============================================
+   SCENE MANAGEMENT
+   All scenes occupy full viewport
+   Only one visible at a time
+   ============================================ */
+
+.scene {
     position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(180deg, #1e2740 0%, #2b3555 30%, #1e2740 100%);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 3s ease-in-out;
+}
+
+.scene.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* ============================================
+   SCENE 1: CABIN COLLAPSES INTO DARKNESS
+   Recreates first storyboard frame exactly
+   ============================================ */
+
+#scene-darkness {
+    background: #000;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background 2s ease;
-    transform-style: preserve-3d;
 }
 
-/* Atmosphere Overlay */
-.atmosphere-overlay {
+.darkness-overlay {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: radial-gradient(ellipse at center, transparent 20%, rgba(10, 14, 26, 0.6) 80%);
-    pointer-events: none;
-    z-index: 100;
-    transition: background 2s ease;
+    background:
+        radial-gradient(ellipse at center, rgba(20, 20, 25, 0.3) 0%, #000 80%),
+        repeating-linear-gradient(
+            90deg,
+            rgba(10, 10, 10, 0.05) 0px,
+            rgba(5, 5, 5, 0.05) 2px,
+            transparent 2px,
+            transparent 4px
+        );
+    opacity: 0;
+    animation: revealFrame 4s ease-in-out 1s forwards;
 }
 
-/* Windows - Left Side */
-.window-row {
-    position: absolute;
-    display: flex;
-    flex-direction: column;
-    gap: 80px;
-    z-index: 5;
+@keyframes revealFrame {
+    to { opacity: 1; }
 }
 
-.left-windows {
-    left: 8%;
-    top: 15%;
-}
-
-.right-windows {
-    right: 8%;
-    top: 15%;
-}
-
-.window {
-    width: 120px;
-    height: 100px;
-    background: linear-gradient(135deg, #0f1a2e 0%, #1a2840 100%);
-    border: 2px solid #3a4a6a;
+.darkness-text {
     position: relative;
-    opacity: 0.7;
-}
-
-.window::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: #3a4a6a;
-}
-
-.window::after {
-    content: '';
-    position: absolute;
-    left: 50%;
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background: #3a4a6a;
-}
-
-/* Ceiling Section */
-.ceiling-section {
-    position: absolute;
-    top: 10%;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 40%;
-    height: 80%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-evenly;
     z-index: 10;
+    color: #8a8a92;
+    font-size: 22px;
+    font-weight: 300;
+    letter-spacing: 3px;
+    text-align: center;
+    opacity: 0;
+    animation: fadeInText 3s ease-in-out 2s forwards;
 }
 
-.ceiling-panel {
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg,
-        transparent 0%,
-        rgba(43, 53, 85, 0.3) 20%,
-        rgba(43, 53, 85, 0.5) 50%,
-        rgba(43, 53, 85, 0.3) 80%,
-        transparent 100%);
+@keyframes fadeInText {
+    to { opacity: 1; }
+}
+
+/* ============================================
+   SCENE CAPTIONS
+   Small, unobtrusive, descriptive text
+   Positioned as shown in storyboard
+   ============================================ */
+
+.scene-caption {
     position: absolute;
-    top: 0;
-    left: 0;
-    border-left: 1px solid rgba(58, 74, 106, 0.4);
-    border-right: 1px solid rgba(58, 74, 106, 0.4);
-}
-
-.ceiling-light {
-    width: 50px;
-    height: 50px;
-    background: radial-gradient(circle, #6a7ba8 0%, #4a5a88 40%, transparent 70%);
-    border-radius: 50%;
-    opacity: 0.6;
-    z-index: 15;
-    position: relative;
-    animation: lightPulse 3s ease-in-out infinite;
-}
-
-@keyframes lightPulse {
-    0%, 100% { opacity: 0.6; }
-    50% { opacity: 0.8; }
-}
-
-/* Floor/Aisle */
-.floor-aisle {
-    position: absolute;
-    bottom: 0;
+    bottom: 40px;
     left: 50%;
     transform: translateX(-50%);
-    width: 35%;
-    height: 100%;
-    background: linear-gradient(180deg,
-        transparent 0%,
-        rgba(20, 25, 40, 0.3) 20%,
-        rgba(20, 25, 40, 0.6) 50%,
-        rgba(20, 25, 40, 0.8) 100%);
-    clip-path: polygon(40% 0%, 60% 0%, 65% 100%, 35% 100%);
-    z-index: 1;
+    color: #6a6a72;
+    font-size: 13px;
+    font-weight: 300;
+    letter-spacing: 1.5px;
+    opacity: 0.7;
+    z-index: 100;
 }
 
-/* Cabin Door */
-.cabin-door {
-    position: absolute;
-    top: 5%;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 180px;
-    height: 120px;
-    background: linear-gradient(180deg, #1a2840 0%, #2b3555 100%);
-    border: 3px solid #3a4a6a;
-    border-radius: 8px;
-    z-index: 20;
-    opacity: 0.8;
-}
+/* ============================================
+   SCENE 4: INTERACTION TYPES OVERLAY
+   Three boxes representing interaction possibilities
+   NOT interactive - visual representation only
+   ============================================ */
 
-.cabin-door::before {
-    content: '';
+.interaction-type-overlay {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 60px;
-    height: 80px;
-    background: rgba(58, 74, 106, 0.3);
-    border: 2px solid #4a5a88;
-    border-radius: 4px;
-}
-
-/* Passengers Container */
-.passengers {
-    position: absolute;
-    width: 80%;
-    height: 80%;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
     z-index: 50;
 }
 
-/* Individual Passenger */
-.passenger {
+.type-box {
+    background: rgba(25, 30, 45, 0.85);
+    border: 1px solid rgba(80, 90, 120, 0.4);
+    border-radius: 8px;
+    padding: 18px 30px;
+    min-width: 320px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+    opacity: 0;
+    animation: fadeInBox 1.5s ease-in-out forwards;
+}
+
+.type-box p {
+    color: #b0b5c0;
+    font-size: 15px;
+    font-weight: 300;
+    letter-spacing: 1px;
+    text-align: center;
+    margin: 0;
+}
+
+.type-variety {
+    animation-delay: 0.5s;
+    border-color: rgba(120, 130, 160, 0.5);
+}
+
+.type-good {
+    animation-delay: 1s;
+    border-color: rgba(140, 160, 180, 0.5);
+    background: rgba(30, 35, 50, 0.85);
+}
+
+.type-bad {
+    animation-delay: 1.5s;
+    border-color: rgba(60, 70, 90, 0.5);
+    background: rgba(15, 20, 30, 0.85);
+}
+
+@keyframes fadeInBox {
+    to { opacity: 1; }
+}
+
+/* ============================================
+   PASSENGERS CONTAINER
+   Invisible hover areas positioned over canvas-drawn silhouettes
+   ============================================ */
+
+#passengers-container {
     position: absolute;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    opacity: 0.85;
-    transition: opacity 1s ease;
-}
-
-.passenger-head {
-    width: 60px;
-    height: 70px;
-    background: linear-gradient(135deg, #6a7ba8 0%, #5a6a98 100%);
-    border-radius: 50% 50% 45% 45%;
-    position: relative;
-    margin-bottom: -10px;
-    z-index: 2;
-}
-
-.passenger-body {
-    width: 90px;
-    height: 110px;
-    background: linear-gradient(180deg, #5a6a98 0%, #4a5a88 100%);
-    border-radius: 45% 45% 20% 20%;
-    z-index: 1;
-}
-
-/* Passenger Positioning */
-.passenger.left-side.p-1 {
-    left: 15%;
-    top: 35%;
-}
-
-.passenger.left-side.p-2 {
-    left: 10%;
-    bottom: 25%;
-}
-
-.passenger.center.p-3 {
-    left: 45%;
-    top: 25%;
-}
-
-.passenger.center.p-4 {
-    left: 48%;
-    bottom: 30%;
-    transform: scale(0.9);
-}
-
-.passenger.right-side.p-5 {
-    right: 15%;
-    top: 38%;
-}
-
-.passenger.right-side.p-6 {
-    right: 12%;
-    bottom: 22%;
-}
-
-/* Flames Container */
-.flames-container {
-    position: absolute;
-    width: 100%;
-    height: 100%;
     top: 0;
     left: 0;
-    z-index: 60;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
     pointer-events: none;
 }
 
-.flame {
+.passenger-hitbox {
     position: absolute;
-    width: 80px;
-    height: 120px;
-    background: linear-gradient(180deg, #ff6b35 0%, #f77f00 50%, #dc2f02 100%);
-    border-radius: 50% 50% 20% 20%;
+    pointer-events: auto;
+    cursor: none;
+    /* Dimensions and positions set dynamically in JS */
+}
+
+/* ============================================
+   DIALOGUE BUBBLE
+   Cloud-like, semi-transparent, irregular edges
+   Attaches to hovered passenger
+   ============================================ */
+
+.dialogue-bubble {
+    position: absolute;
+    z-index: 100;
+    pointer-events: none;
     opacity: 0;
-    filter: blur(8px);
-    transition: opacity 1.5s ease;
-    animation: flameFlicker 2s infinite alternate;
+    transition: opacity 0.8s ease-in-out;
 }
 
-.flame.active {
-    opacity: 0.85;
-}
-
-.flame-1 {
-    left: 20%;
-    top: 30%;
-}
-
-.flame-2 {
-    left: 20%;
-    bottom: 25%;
-}
-
-.flame-3 {
-    right: 20%;
-    top: 32%;
-}
-
-.flame-4 {
-    right: 20%;
-    bottom: 28%;
-}
-
-@keyframes flameFlicker {
-    0%, 100% {
-        transform: scale(1) translateY(0);
-        opacity: 0.85;
-    }
-    50% {
-        transform: scale(1.05) translateY(-8px);
-        opacity: 0.7;
-    }
-}
-
-/* Environment States */
-#train-cabin.dark {
-    background: linear-gradient(180deg, #0a0e1a 0%, #0f1322 50%, #0a0e1a 100%);
-}
-
-#train-cabin.dark .ceiling-light {
-    opacity: 0.2;
-}
-
-#train-cabin.dark .atmosphere-overlay {
-    background: radial-gradient(ellipse at center, transparent 10%, rgba(0, 0, 0, 0.8) 70%);
-}
-
-#train-cabin.darker {
-    background: #000000;
-}
-
-#train-cabin.darker .ceiling-light {
-    opacity: 0;
-}
-
-#train-cabin.darker .atmosphere-overlay {
-    background: rgba(0, 0, 0, 0.95);
-}
-
-#train-cabin.bright {
-    background: linear-gradient(180deg, #ffb703 0%, #ffd60a 50%, #ffb703 100%);
-}
-
-#train-cabin.bright .ceiling-light {
-    background: radial-gradient(circle, #ffffff 0%, #fffacd 40%, transparent 70%);
+.dialogue-bubble.visible {
     opacity: 1;
+    pointer-events: auto;
 }
 
-#train-cabin.bright .window {
-    background: linear-gradient(135deg, #fb8500 0%, #ffb703 100%);
+.dialogue-bubble.hidden {
+    opacity: 0;
+    pointer-events: none;
 }
 
-#train-cabin.bright .atmosphere-overlay {
-    background: radial-gradient(ellipse at center, rgba(255, 215, 10, 0.3) 20%, transparent 80%);
+.bubble-content {
+    background: rgba(25, 32, 48, 0.92);
+    border: 1px solid rgba(70, 80, 110, 0.5);
+    border-radius: 25px 25px 25px 8px;
+    padding: 22px 26px;
+    min-width: 320px;
+    max-width: 400px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7);
+    filter: blur(0.3px);
+    position: relative;
 }
 
-/* Dialogue Interface - LEFT ALIGNED */
-#dialogue-interface {
+/* Cloud-like irregular edge effect */
+.bubble-content::before {
+    content: '';
     position: absolute;
-    left: 5%;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 420px;
-    max-width: 35%;
-    z-index: 200;
-    background: rgba(30, 39, 64, 0.92);
-    border: 2px solid #4a5a88;
-    border-radius: 6px;
-    padding: 30px 25px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: inherit;
+    border-radius: inherit;
+    filter: blur(4px);
+    opacity: 0.4;
+    z-index: -1;
 }
 
-.dialogue-content {
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-}
-
-.narrative-text {
-    font-size: 15px;
-    line-height: 1.7;
-    color: #d8dce8;
-    margin: 0;
-    font-weight: normal;
-}
-
-.question-text {
-    font-size: 15px;
-    line-height: 1.7;
-    color: #c8ccd8;
-    margin: 0;
-    font-style: italic;
-    min-height: 20px;
-}
-
-.question-text:empty {
-    display: none;
-}
-
-/* Choices Container */
-.choices-container {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-top: 8px;
-}
-
-.choices-container.hidden {
-    display: none;
-}
-
-.choice-btn {
-    background: rgba(42, 52, 78, 0.8);
-    color: #d8dce8;
-    border: 2px solid #4a5a88;
-    padding: 14px 18px;
+.bubble-background {
+    color: #9a9fb0;
     font-size: 14px;
-    font-family: 'Georgia', 'Times New Roman', serif;
-    cursor: pointer;
-    border-radius: 4px;
-    text-align: left;
-    transition: all 0.3s ease;
-    line-height: 1.5;
+    line-height: 1.6;
+    margin-bottom: 12px;
+    font-weight: 300;
 }
 
-.choice-btn:hover {
-    background: rgba(58, 74, 106, 0.9);
-    border-color: #6a7ba8;
-    transform: translateX(4px);
-}
-
-.choice-btn:active {
-    transform: translateX(4px) scale(0.98);
-}
-
-/* Continue Button */
-.continue-btn {
-    background: rgba(58, 74, 106, 0.8);
-    color: #e8e8e8;
-    border: 2px solid #6a7ba8;
-    padding: 12px 28px;
+.bubble-question {
+    color: #c0c5d5;
     font-size: 15px;
-    font-family: 'Georgia', 'Times New Roman', serif;
+    line-height: 1.7;
+    margin-bottom: 16px;
+    font-style: italic;
+    font-weight: 400;
+}
+
+.bubble-choices {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.choice-option {
+    background: rgba(40, 48, 68, 0.7);
+    border: 1px solid rgba(80, 90, 120, 0.4);
+    border-radius: 6px;
+    padding: 12px 16px;
+    color: #a8adb8;
+    font-size: 13px;
+    font-family: 'Crimson Text', 'Georgia', serif;
+    font-weight: 300;
+    text-align: left;
     cursor: pointer;
-    border-radius: 4px;
-    transition: all 0.3s ease;
-    align-self: flex-start;
-    margin-top: 8px;
+    transition: all 0.4s ease;
+    letter-spacing: 0.5px;
 }
 
-.continue-btn:hover {
-    background: rgba(74, 90, 136, 0.9);
-    transform: scale(1.03);
+.choice-option:hover {
+    background: rgba(50, 60, 85, 0.85);
+    border-color: rgba(100, 110, 140, 0.6);
+    color: #c8cdd8;
+    transform: translateX(3px);
 }
 
-.continue-btn:active {
-    transform: scale(0.98);
+.choice-option:active {
+    transform: translateX(3px) scale(0.98);
 }
 
-.continue-btn.hidden {
-    display: none;
+/* ============================================
+   ENVIRONMENT BRIGHTNESS STATES
+   Applied to main interactive canvas scene
+   Gradual transitions based on cumulative choices
+   ============================================ */
+
+/* Default state */
+#scene-interactive {
+    filter: brightness(1) contrast(1);
+    transition: filter 4s ease-in-out;
 }
 
-/* Fade Transitions */
-.fade-transition {
-    animation: fadeTransition 0.8s ease;
+/* Slight brightening (after some positive choices) */
+#scene-interactive.env-lighter-1 {
+    filter: brightness(1.1) contrast(0.98);
 }
 
-@keyframes fadeTransition {
-    0% { opacity: 1; }
-    50% { opacity: 0.3; }
-    100% { opacity: 1; }
+#scene-interactive.env-lighter-2 {
+    filter: brightness(1.2) contrast(0.96);
 }
 
-/* Responsive Design */
-@media (max-width: 1200px) {
-    #dialogue-interface {
-        width: 380px;
-        max-width: 40%;
-        padding: 25px 20px;
+#scene-interactive.env-lighter-3 {
+    filter: brightness(1.3) contrast(0.94);
+}
+
+/* Slight darkening (after some negative choices) */
+#scene-interactive.env-darker-1 {
+    filter: brightness(0.9) contrast(1.05);
+}
+
+#scene-interactive.env-darker-2 {
+    filter: brightness(0.8) contrast(1.1);
+}
+
+#scene-interactive.env-darker-3 {
+    filter: brightness(0.7) contrast(1.15);
+}
+
+/* ============================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================ */
+
+@media (max-width: 1024px) {
+    .darkness-text {
+        font-size: 18px;
+        letter-spacing: 2px;
     }
 
-    .narrative-text,
-    .question-text {
+    .scene-caption {
+        font-size: 11px;
+    }
+
+    .type-box {
+        min-width: 280px;
+        padding: 16px 24px;
+    }
+
+    .type-box p {
         font-size: 14px;
     }
 
-    .choice-btn {
-        font-size: 13px;
-        padding: 12px 16px;
+    .bubble-content {
+        min-width: 280px;
+        max-width: 340px;
+        padding: 20px 22px;
     }
 }
 
 @media (max-width: 768px) {
-    #dialogue-interface {
-        width: 90%;
-        max-width: 90%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        padding: 20px 18px;
+    .darkness-text {
+        font-size: 16px;
     }
 
-    .passenger {
-        transform: scale(0.8);
+    .type-box {
+        min-width: 240px;
+        padding: 14px 20px;
     }
 
-    .ceiling-light {
-        width: 40px;
-        height: 40px;
+    .type-box p {
+        font-size: 13px;
     }
 
-    .window {
-        width: 80px;
-        height: 70px;
+    .bubble-content {
+        min-width: 240px;
+        max-width: 300px;
     }
 }
