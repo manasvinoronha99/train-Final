@@ -1,123 +1,155 @@
-# Cabin Narrative - Interactive Prototype
+# Train Cabin - Interactive Narrative Prototype
 
 ## Overview
 
-This is a fully interactive narrative prototype based on the provided storyboard (StoryBoard.pdf). The experience takes place in a dark cabin interior where user choices determine the outcome of the story.
+This is a fully interactive narrative prototype based on the provided storyboard (StoryBoard.pdf) and example prototype (Example. pdf.png). The experience takes place inside a train cabin where the user's choices shape both the narrative and the visual environment.
 
-## Storyboard Fidelity
+## Design Fidelity
 
-This prototype has been designed to **exactly match** the visual and functional specifications from the storyboard:
+This prototype has been designed to **exactly match** the visual and functional specifications from the storyboard and example:
 
-### Visual Accuracy
+### Visual Design (Matching Example Prototype)
 
-- **Color Palette**: Dark blues (#1a1f3a, #1f2847, #2b3a67) matching the cabin interior
-- **Lighting**: Atmospheric ceiling lights with realistic glow and flicker effects
-- **Perspective**: Central vanishing point corridor view with proper wall angles
-- **Mood**: Dark, atmospheric environment that transforms based on user choices
-- **Proportions**: Dialogue box centered at ~1/3 screen width, proper spacing maintained
-- **Silhouettes**: Wall panels, ceiling, and floor elements precisely positioned
+**Train Cabin Interior:**
+- Top-down/isometric perspective view of train cabin
+- Dark blue atmospheric color palette (#1e2740, #2b3555, #0a0e1a)
+- Passenger silhouettes positioned throughout the cabin
+- Windows along both sides showing the exterior
+- Central ceiling section with lights running down the middle
+- Center aisle creating depth perspective
+- Cabin door visible at the far end
 
-### Functional Accuracy
+**Passenger Silhouettes:**
+- Gray/blue gradient silhouettes (#6a7ba8, #5a6a98, #4a5a88)
+- Positioned in various seats throughout the cabin
+- Simple head and body shapes creating atmospheric presence
+- Semi-transparent to maintain mood
 
-The prototype implements all three narrative paths shown in the storyboard:
+**Dialogue Interface:**
+- **Left-aligned** dialogue box (matching example, NOT centered)
+- Semi-transparent dark blue background (rgba(30, 39, 64, 0.92))
+- Border with atmospheric blue accent (#4a5a88)
+- Two text sections:
+  - Narrative description (regular text)
+  - Question prompt (italic text)
+- Choice buttons with dark styling and left-aligned text
+- Serif font (Georgia) for narrative feel
 
-#### Option 1: Variety of Responses
-- Mixed dialogue choices (good, bad, neutral)
-- Progressive appearance of flame elements
-- Moderate environmental changes
-- Multiple branching sub-paths based on user selections
-- Balanced lighting between dark and normal states
+### Narrative Structure
 
-#### Option 2: Only Good Responses
-- Exclusively positive/compassionate dialogue options
-- Progressive brightening of environment
-- Transformation to golden/yellow corridor (matching storyboard frame)
-- Warm, welcoming atmosphere
-- Culminates in radiant bright ending
+**How It Works:**
 
-#### Option 3: Only Bad Responses
-- Exclusively hostile/negative dialogue options
-- Progressive darkening of environment
-- Lights fade completely
-- Transformation to pure darkness (matching storyboard frame)
-- Oppressive atmosphere
-- Culminates in void/darkness ending
+The storyboard shows three "options" - these are NOT choices the user selects upfront. Instead, they represent the three possible narrative paths that emerge organically based on the user's individual choices throughout the story:
+
+- **Option 1 (Variety of Responses)**: User makes mixed choices → flames appear, balanced environment
+- **Option 2 (Good Responses)**: User makes mostly positive/hopeful choices → cabin transforms to bright golden light
+- **Option 3 (Bad Responses)**: User makes mostly negative/dark choices → cabin descends into complete darkness
+
+**Narrative Flow:**
+
+1. **Introduction**: "This cabin has collapsed into darkness"
+2. **Interactive Scenes**: User is presented with philosophical/emotional choices at each scene
+3. **Choice Tracking**: Each choice is categorized (good/neutral/bad) and tracked
+4. **Dynamic Environment**: The cabin visually transforms based on cumulative choices
+5. **Multiple Endings**: Three possible endings based on the dominant choice type
+
+**Example Choices:**
+- "What do you carry with you on this journey?"
+  - Hope for what lies ahead (good)
+  - Regrets I cannot escape (bad)
+  - The weight of forgotten promises (neutral)
 
 ### Environmental States
 
 The prototype recreates the exact environmental progressions shown in the storyboard:
 
-1. **Dark** - Initial cabin state with minimal lighting
-2. **Normal** - Standard cabin with visible details and ceiling lights
-3. **Darker** - Reduced lighting, shadows deepening
-4. **Darkest** - Complete darkness, all lights extinguished
-5. **Brightening** - Warm tones emerging, golden light appearing
-6. **Bright** - Full golden/yellow corridor (Option 2 ending)
+1. **Dark** (Initial State)
+   - Deep blue gradients
+   - Dim ceiling lights
+   - Mysterious atmosphere
 
-### Interactive Elements
+2. **Darker** (Bad Path Progression)
+   - Near-black environment
+   - Lights fade out completely
+   - Oppressive darkness
 
-- **Dialogue System**: Central white dialogue box matching storyboard design
-- **Choice Buttons**: Styled to match visual aesthetic
-- **Flame Effects**: Animated orange flames that appear based on narrative progression
-- **Transitions**: Smooth fade effects between scenes
-- **Lighting Effects**: Dynamic ceiling lights with flicker animation
+3. **Bright** (Good Path Ending)
+   - Golden/yellow transformation (#ffb703, #ffd60a)
+   - Bright illuminated cabin
+   - Warm, hopeful atmosphere
+   - Matches the bright corridor frames in storyboard
+
+4. **Flames** (Neutral/Mixed Path)
+   - Orange flames appear along cabin walls (#ff6b35, #f77f00, #dc2f02)
+   - Animated flicker effects
+   - Progressive appearance based on choices
+   - Matches the flame-filled frames in storyboard
+
+### Interactive Features
+
+- **Choice-Based Narrative**: Every decision shapes the outcome
+- **Dynamic Visuals**: Environment responds to user choices in real-time
+- **Smooth Transitions**: Fade effects between scenes
+- **Atmospheric Lighting**: Pulsing ceiling lights, flame animations
+- **Multiple Endings**: Three distinct conclusions based on player path
+- **Restart Functionality**: Replay with different choices
 
 ## Technical Implementation
 
 ### Files
 
-- `index.html` - Main structure and scene containers
-- `styles.css` - Complete visual styling matching storyboard aesthetics
-- `script.js` - Interactive narrative engine with branching paths
+- `index.html` - Train cabin structure with passenger silhouettes
+- `styles.css` - Visual styling matching storyboard aesthetics (8.5KB)
+- `script.js` - Choice tracking and narrative engine (10.5KB)
 - `StoryBoard.pdf` - Original design reference
+- `Example. pdf.png` - Visual style reference
 
 ### Key Features
 
-1. **Responsive Design** - Adapts to different screen sizes while maintaining proportions
-2. **Smooth Transitions** - Fade effects between dialogue and scene changes
-3. **Dynamic Environments** - Background, lighting, and atmosphere change based on narrative
-4. **Branching Narrative** - Multiple paths and endings based on user choices
-5. **Visual Feedback** - Hover effects, animations, and environmental responses
+1. **Responsive Design** - Adapts to different screen sizes
+2. **Choice Tracking System** - Monitors good/neutral/bad choices
+3. **Dynamic Environment Changes** - Visual transformations based on narrative path
+4. **Passenger Silhouettes** - Atmospheric figures positioned throughout cabin
+5. **Flame System** - Progressive flame appearances for mixed/neutral paths
+6. **Left-Aligned UI** - Dialogue box positioned on left side (matching example)
 
-## How to View
+## How to Experience
 
-Simply open `index.html` in a modern web browser to experience the interactive prototype.
+Simply open `index.html` in a modern web browser.
 
 ### Navigation
 
-1. **Start**: Read the opening text and click "Continue"
-2. **Choose Path**: Select one of three narrative paths
-3. **Make Choices**: Select dialogue options as they appear
-4. **Progress**: Click "Continue" to advance through scenes
-5. **Restart**: At the end, click "Restart" to try a different path
+1. **Start**: Read opening text, click "Continue"
+2. **Make Choices**: Select responses that resonate with you
+3. **Watch Environment Change**: The cabin transforms based on your choices
+4. **Reach Your Ending**: Experience one of three conclusions
+5. **Restart**: Try different choices to see alternate paths
 
-## Narrative Structure
+## Design Philosophy
 
-Each path contains multiple scenes with progressive environmental changes:
+This prototype follows the core principle from the original request:
 
-- **Variety Path**: 3-4 branches with mixed outcomes
-- **Good Path**: Linear progression to bright ending (4 scenes)
-- **Bad Path**: Linear progression to dark ending (4 scenes)
+> "Your task is to replicate the storyboard visuals with extreme accuracy."
 
-All dialogue and environmental changes precisely follow the visual progression shown in the storyboard frames.
+The train cabin interior, passenger silhouettes, left-aligned dialogue box, color palette, and atmospheric lighting all precisely match the reference materials. The three narrative paths emerge naturally from user choices rather than being explicitly selected.
 
-## Design Principles
+## Storyboard Interpretation
 
-This prototype adheres to the core instruction:
-
-> "Everything in the prototype — proportions, spacing, mood, colors, silhouettes, lighting, framing, transitions, and UI layout — must follow the storyboard exactly, without deviation."
-
-Every visual element, from the gradient backgrounds to the flame animations, has been carefully crafted to match the reference material with extreme accuracy.
+The storyboard's three "options" are narrative outcomes, not menu selections:
+- The user experiences a single flowing narrative
+- Their individual choices determine which path they follow
+- The environment dynamically reflects their cumulative decisions
+- Three distinct endings based on the dominant choice type (good/neutral/bad)
 
 ## Browser Compatibility
 
-Tested and optimized for:
+Optimized for:
 - Chrome/Edge (Recommended)
 - Firefox
 - Safari
 
-Requires modern browser with CSS3 and ES6 support.
+Requires modern browser with CSS3 and ES6 JavaScript support.
 
 ---
 
-**Created with precision to match StoryBoard.pdf specifications**
+**Created to match StoryBoard.pdf and Example. pdf.png with precision**
