@@ -17,10 +17,10 @@ const STATE = {
 };
 
 const SCENES = {
-    darkness: { duration: 6000, next: 'bw-cabin' },
-    'bw-cabin': { duration: 4000, next: 'color-intro' },
-    'color-intro': { duration: 4000, next: 'interaction-types' },
-    'interaction-types': { duration: 5000, next: 'interactive' },
+    darkness: { duration: 2000, next: 'bw-cabin' }, // Reduced for testing
+    'bw-cabin': { duration: 3000, next: 'color-intro' },
+    'color-intro': { duration: 3000, next: 'interaction-types' },
+    'interaction-types': { duration: 3000, next: 'interactive' },
     interactive: { duration: null, next: null } // End state
 };
 
