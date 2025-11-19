@@ -1,24 +1,8 @@
-// Narrative Data
-const narrative = [
+// Passenger narrative data - unique for each passenger
+const passengerNarratives = [
     {
-        id: 'intro',
-        text: 'This cabin has collapsed into darkness',
-        question: '',
-        choices: null
-    },
-    {
-        id: 'scene1',
-        text: 'You find yourself in a train cabin, surrounded by shadowy figures. The air is cold and heavy with silence.',
-        question: 'What do you feel in this moment?',
-        choices: [
-            { text: 'Hope for what lies ahead', value: 'good' },
-            { text: 'Regrets I cannot escape', value: 'bad' },
-            { text: 'The weight of forgotten promises', value: 'neutral' }
-        ]
-    },
-    {
-        id: 'scene2',
-        text: 'A figure sits hunched nearby, clutching something close. Their silhouette trembles slightly.',
+        id: 0,
+        text: 'This figure sits hunched, clutching something close. Their silhouette trembles slightly, as if cold or afraid.',
         question: 'What do you carry with you on this journey?',
         choices: [
             { text: 'Hope for what lies ahead', value: 'good' },
@@ -27,61 +11,67 @@ const narrative = [
         ]
     },
     {
-        id: 'scene3',
-        text: 'The cabin seems to respond to your presence. Shadows shift along the walls.',
-        question: 'How do you respond to the darkness?',
+        id: 1,
+        text: 'A figure gazes toward the window, their posture suggesting distant thoughts.',
+        question: 'What do you see when you look outside?',
         choices: [
-            { text: 'I seek to bring light to others', value: 'good' },
-            { text: 'I embrace the void', value: 'bad' },
-            { text: 'I observe and accept what is', value: 'neutral' }
+            { text: 'Possibilities waiting to unfold', value: 'good' },
+            { text: 'Everything slipping away', value: 'bad' },
+            { text: 'The endless passage of time', value: 'neutral' }
         ]
     },
     {
-        id: 'scene4',
-        text: 'Other passengers begin to stir. Some look toward you, their faces obscured by shadow.',
-        question: 'What truth do you speak to them?',
+        id: 2,
+        text: 'This passenger sits perfectly still, as if frozen in a moment long past.',
+        question: 'What memory holds you here?',
         choices: [
-            { text: 'We can find our way together', value: 'good' },
-            { text: 'We are already lost', value: 'bad' },
-            { text: 'Each must find their own path', value: 'neutral' }
+            { text: 'A moment of connection I wish to relive', value: 'good' },
+            { text: 'The last time I felt anything at all', value: 'bad' },
+            { text: 'A choice I made that I cannot undo', value: 'neutral' }
         ]
     },
     {
-        id: 'scene5',
-        text: 'The train continues through the endless night. Your choices have shaped the journey.',
-        question: 'What will you remember from this passage?',
+        id: 3,
+        text: 'A figure reaches toward the aisle, their hand suspended in empty air.',
+        question: 'What are you reaching for?',
         choices: [
-            { text: 'The warmth of connection', value: 'good' },
-            { text: 'The cold of isolation', value: 'bad' },
-            { text: 'The journey itself', value: 'neutral' }
+            { text: 'Someone who might reach back', value: 'good' },
+            { text: 'Nothing—just habit', value: 'bad' },
+            { text: 'Something I once knew', value: 'neutral' }
+        ]
+    },
+    {
+        id: 4,
+        text: 'This silhouette seems to breathe in rhythm with the train\'s movement.',
+        question: 'Where does this journey lead?',
+        choices: [
+            { text: 'Toward something new', value: 'good' },
+            { text: 'Nowhere—it never did', value: 'bad' },
+            { text: 'It doesn\'t matter anymore', value: 'neutral' }
+        ]
+    },
+    {
+        id: 5,
+        text: 'A figure leans against the seat, their form partially obscured by shadow.',
+        question: 'What truth do you carry in silence?',
+        choices: [
+            { text: 'That light exists even in darkness', value: 'good' },
+            { text: 'That I am already lost', value: 'bad' },
+            { text: 'That some things cannot be spoken', value: 'neutral' }
         ]
     }
 ];
 
-const endings = {
-    good: {
-        text: 'Light begins to fill the cabin. The passengers around you seem to glow with warmth. You have brought illumination to the darkness.'
-    },
-    bad: {
-        text: 'The darkness deepens. All light fades from existence. You become one with the void that surrounds you.'
-    },
-    neutral: {
-        text: 'You exist in the space between light and darkness. Neither claims you completely. The journey continues.'
-    }
-};
-
-// Game State
-let currentSceneIndex = 0;
+// Game state
+const passengerBrightness = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5];
+const interactedWith = new Set();
 let choiceScores = { good: 0, bad: 0, neutral: 0 };
-
-// Passenger brightness tracking (0 = darkest, 1 = brightest)
-let passengerBrightness = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5];
 
 // Canvas setup
 const c = document.getElementById("scene");
 const ctx = c.getContext("2d");
 
-// Draw the train cabin (using exact code from user's HTML)
+// Draw the train cabin using EXACT code from user's HTML
 function draw() {
     ctx.clearRect(0, 0, c.width, c.height);
 
@@ -208,8 +198,8 @@ function passenger(x, y, scale = 1, lean = 0, brightness = 0.5) {
     ctx.scale(scale, scale);
     ctx.rotate(lean);
 
-    // Calculate color based on brightness (darker to lighter)
-    const baseGray = Math.floor(100 + (brightness * 155)); // 100-255 range
+    // Calculate color based on brightness (0 = dark, 1 = light)
+    const baseGray = Math.floor(80 + (brightness * 175)); // 80-255 range
     const figureColor = `rgb(${baseGray}, ${baseGray}, ${baseGray})`;
 
     // head
@@ -239,88 +229,116 @@ function passenger(x, y, scale = 1, lean = 0, brightness = 0.5) {
     ctx.restore();
 }
 
-// DOM Elements
-const narrativeText = document.getElementById('narrative-text');
-const questionText = document.getElementById('question-text');
-const choicesContainer = document.getElementById('choices-container');
-const continueBtn = document.getElementById('continue-btn');
-const trainCabin = document.getElementById('train-cabin');
+// Setup hover interactions
+function setupPassengerInteractions() {
+    passengerNarratives.forEach((narrative, index) => {
+        const zone = document.getElementById(`passenger-${index}`);
 
-// Show Scene
-function showScene(scene) {
-    narrativeText.textContent = scene.text;
-    questionText.textContent = scene.question || '';
+        zone.addEventListener('mouseenter', (e) => {
+            if (!interactedWith.has(index)) {
+                showDialogue(narrative, e.clientX, e.clientY);
+            }
+        });
 
-    if (scene.choices) {
-        showChoices(scene.choices);
-        continueBtn.classList.add('hidden');
-    } else {
-        choicesContainer.classList.add('hidden');
-        continueBtn.classList.remove('hidden');
-    }
-
-    updateEnvironmentByChoices();
+        zone.addEventListener('mouseleave', () => {
+            if (!interactedWith.has(index)) {
+                hideDialogue();
+            }
+        });
+    });
 }
 
-// Show Choices
-function showChoices(choices) {
-    choicesContainer.innerHTML = '';
+// Show dialogue bubble
+function showDialogue(narrative, mouseX, mouseY) {
+    const bubble = document.getElementById('dialogue-bubble');
+    const dialogueText = document.getElementById('dialogue-text');
+    const dialogueQuestion = document.getElementById('dialogue-question');
+    const choicesContainer = document.getElementById('choices-container');
 
-    choices.forEach((choice) => {
+    dialogueText.textContent = narrative.text;
+    dialogueQuestion.textContent = narrative.question;
+
+    // Clear and create choice buttons
+    choicesContainer.innerHTML = '';
+    narrative.choices.forEach(choice => {
         const btn = document.createElement('button');
         btn.className = 'choice-btn';
         btn.textContent = choice.text;
-        btn.addEventListener('click', () => handleChoice(choice));
+        btn.onclick = () => handleChoice(narrative.id, choice.value);
         choicesContainer.appendChild(btn);
     });
 
-    choicesContainer.classList.remove('hidden');
+    // Position bubble near mouse
+    bubble.style.left = Math.min(mouseX + 20, window.innerWidth - 420) + 'px';
+    bubble.style.top = Math.min(mouseY - 50, window.innerHeight - 300) + 'px';
+    bubble.classList.add('visible');
 }
 
-// Handle Choice
-function handleChoice(choice) {
-    choiceScores[choice.value]++;
-
-    // Update passenger brightness based on choice
-    // Each scene corresponds to a passenger (scenes 1-6 map to passengers 0-5)
-    const passengerIndex = currentSceneIndex - 1; // Subtract 1 because intro is scene 0
-
-    if (passengerIndex >= 0 && passengerIndex < passengerBrightness.length) {
-        if (choice.value === 'good') {
-            passengerBrightness[passengerIndex] = Math.min(1.0, passengerBrightness[passengerIndex] + 0.3);
-        } else if (choice.value === 'bad') {
-            passengerBrightness[passengerIndex] = Math.max(0.1, passengerBrightness[passengerIndex] - 0.3);
-        }
-        // Neutral doesn't change brightness
-        draw(); // Redraw with new brightness
-    }
-
-    currentSceneIndex++;
-
-    if (currentSceneIndex < narrative.length) {
-        showScene(narrative[currentSceneIndex]);
-    } else {
-        showEnding();
-    }
+// Hide dialogue bubble
+function hideDialogue() {
+    const bubble = document.getElementById('dialogue-bubble');
+    bubble.classList.remove('visible');
 }
 
-// Handle Continue
-function handleContinue() {
-    if (continueBtn.textContent === 'Restart') {
-        restart();
-        return;
+// Handle choice selection
+function handleChoice(passengerId, choiceValue) {
+    // Mark passenger as interacted
+    interactedWith.add(passengerId);
+
+    // Track choice
+    choiceScores[choiceValue]++;
+
+    // Update passenger brightness
+    if (choiceValue === 'good') {
+        passengerBrightness[passengerId] = Math.min(1.0, passengerBrightness[passengerId] + 0.35);
+    } else if (choiceValue === 'bad') {
+        passengerBrightness[passengerId] = Math.max(0.15, passengerBrightness[passengerId] - 0.35);
     }
+    // neutral doesn't change individual brightness
 
-    currentSceneIndex++;
+    // Redraw cabin with new passenger brightness
+    draw();
 
-    if (currentSceneIndex < narrative.length) {
-        showScene(narrative[currentSceneIndex]);
-    } else {
-        showEnding();
+    // Update overall cabin brightness
+    updateCabinBrightness();
+
+    // Hide dialogue
+    hideDialogue();
+
+    // Check if all passengers interacted with
+    if (interactedWith.size === 6) {
+        setTimeout(showEnding, 1000);
     }
 }
 
-// Show Ending
+// Update overall cabin brightness based on cumulative choices
+function updateCabinBrightness() {
+    const total = choiceScores.good + choiceScores.bad + choiceScores.neutral;
+    if (total === 0) return;
+
+    const goodPercent = choiceScores.good / total;
+    const badPercent = choiceScores.bad / total;
+
+    const cabin = document.getElementById('train-cabin');
+    cabin.classList.remove('env-lighter-1', 'env-lighter-2', 'env-lighter-3',
+                           'env-darker-1', 'env-darker-2', 'env-darker-3');
+
+    if (goodPercent > 0.6) {
+        cabin.classList.add('env-lighter-3');
+    } else if (goodPercent > 0.4) {
+        cabin.classList.add('env-lighter-2');
+    } else if (goodPercent > 0.2) {
+        cabin.classList.add('env-lighter-1');
+    } else if (badPercent > 0.6) {
+        cabin.classList.add('env-darker-3');
+    } else if (badPercent > 0.4) {
+        cabin.classList.add('env-darker-2');
+    } else if (badPercent > 0.2) {
+        cabin.classList.add('env-darker-1');
+    }
+}
+
+// Show ending based on dominant choice type
 function showEnding() {
     let dominantPath = 'neutral';
     let maxScore = choiceScores.neutral;
@@ -333,64 +351,36 @@ function showEnding() {
         dominantPath = 'bad';
     }
 
-    const ending = endings[dominantPath];
+    const endings = {
+        good: 'Light begins to fill the cabin. The passengers around you seem to glow with warmth. You have brought illumination to the darkness. Your journey continues with hope.',
+        bad: 'The darkness deepens. All light fades from existence. You become one with the void that surrounds you. The cabin grows cold and silent.',
+        neutral: 'You exist in the space between light and darkness. Neither claims you completely. The journey continues, balanced on the edge of shadow and light.'
+    };
 
-    narrativeText.textContent = ending.text;
-    questionText.textContent = '';
-    choicesContainer.classList.add('hidden');
-
-    continueBtn.textContent = 'Restart';
-    continueBtn.classList.remove('hidden');
+    document.getElementById('ending-text').textContent = endings[dominantPath];
+    document.getElementById('ending-overlay').classList.add('visible');
 }
 
-// Update Environment
-function updateEnvironmentByChoices() {
-    const total = choiceScores.good + choiceScores.bad + choiceScores.neutral;
-    if (total === 0) return;
-
-    const goodPercent = choiceScores.good / total;
-    const badPercent = choiceScores.bad / total;
-
-    trainCabin.classList.remove(
-        'env-lighter-1', 'env-lighter-2', 'env-lighter-3',
-        'env-darker-1', 'env-darker-2', 'env-darker-3'
-    );
-
-    if (goodPercent > 0.6) {
-        trainCabin.classList.add('env-lighter-3');
-    } else if (goodPercent > 0.4) {
-        trainCabin.classList.add('env-lighter-2');
-    } else if (goodPercent > 0.2) {
-        trainCabin.classList.add('env-lighter-1');
-    } else if (badPercent > 0.6) {
-        trainCabin.classList.add('env-darker-3');
-    } else if (badPercent > 0.4) {
-        trainCabin.classList.add('env-darker-2');
-    } else if (badPercent > 0.2) {
-        trainCabin.classList.add('env-darker-1');
-    }
-}
-
-// Restart
+// Restart the experience
 function restart() {
-    currentSceneIndex = 0;
+    // Reset all state
+    interactedWith.clear();
     choiceScores = { good: 0, bad: 0, neutral: 0 };
-    passengerBrightness = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5];
-    continueBtn.textContent = 'Continue';
+    passengerBrightness.fill(0.5);
 
+    // Reset visual states
+    const cabin = document.getElementById('train-cabin');
+    cabin.classList.remove('env-lighter-1', 'env-lighter-2', 'env-lighter-3',
+                           'env-darker-1', 'env-darker-2', 'env-darker-3');
+
+    document.getElementById('ending-overlay').classList.remove('visible');
+
+    // Redraw cabin
     draw();
-
-    trainCabin.classList.remove(
-        'env-lighter-1', 'env-lighter-2', 'env-lighter-3',
-        'env-darker-1', 'env-darker-2', 'env-darker-3'
-    );
-
-    showScene(narrative[0]);
 }
 
-// Initialize
+// Initialize on page load
 window.addEventListener('DOMContentLoaded', () => {
     draw();
-    showScene(narrative[0]);
-    continueBtn.addEventListener('click', handleContinue);
+    setupPassengerInteractions();
 });

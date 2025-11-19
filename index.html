@@ -4,24 +4,183 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Train Cabin Narrative</title>
-    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            margin: 0;
+            background: #2f3150;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: 'Georgia', 'Times New Roman', serif;
+        }
+
+        #train-cabin {
+            position: relative;
+            transition: filter 2s ease;
+        }
+
+        canvas {
+            background: #2f3150;
+            display: block;
+        }
+
+        /* Hoverable passenger areas */
+        .passenger-zone {
+            position: absolute;
+            cursor: pointer;
+            opacity: 0; /* Invisible but hoverable */
+        }
+
+        .passenger-zone:hover {
+            opacity: 0.1;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Dialogue bubble */
+        #dialogue-bubble {
+            position: absolute;
+            background: rgba(30, 39, 64, 0.95);
+            border: 2px solid #4a5a88;
+            border-radius: 12px;
+            padding: 25px;
+            min-width: 350px;
+            max-width: 400px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
+            display: none;
+            z-index: 1000;
+        }
+
+        #dialogue-bubble.visible {
+            display: block;
+        }
+
+        .dialogue-text {
+            color: #d8dce8;
+            font-size: 15px;
+            line-height: 1.7;
+            margin-bottom: 15px;
+        }
+
+        .dialogue-question {
+            color: #c8ccd8;
+            font-size: 15px;
+            line-height: 1.7;
+            font-style: italic;
+            margin-bottom: 18px;
+        }
+
+        .choice-btn {
+            display: block;
+            width: 100%;
+            background: rgba(42, 52, 78, 0.8);
+            color: #d8dce8;
+            border: 2px solid #4a5a88;
+            padding: 12px 16px;
+            font-size: 14px;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            cursor: pointer;
+            border-radius: 4px;
+            text-align: left;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .choice-btn:hover {
+            background: rgba(58, 74, 106, 0.9);
+            border-color: #6a7ba8;
+            transform: translateX(4px);
+        }
+
+        .choice-btn:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Environment states */
+        #train-cabin.env-lighter-1 { filter: brightness(1.15); }
+        #train-cabin.env-lighter-2 { filter: brightness(1.3); }
+        #train-cabin.env-lighter-3 { filter: brightness(1.5); }
+        #train-cabin.env-darker-1 { filter: brightness(0.85); }
+        #train-cabin.env-darker-2 { filter: brightness(0.7); }
+        #train-cabin.env-darker-3 { filter: brightness(0.5); }
+
+        /* Ending overlay */
+        #ending-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        #ending-overlay.visible {
+            display: flex;
+        }
+
+        .ending-content {
+            background: rgba(30, 39, 64, 0.95);
+            border: 2px solid #4a5a88;
+            border-radius: 12px;
+            padding: 40px;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        .ending-text {
+            color: #d8dce8;
+            font-size: 18px;
+            line-height: 1.8;
+            margin-bottom: 25px;
+        }
+
+        .restart-btn {
+            background: rgba(58, 74, 106, 0.8);
+            color: #e8e8e8;
+            border: 2px solid #6a7ba8;
+            padding: 12px 30px;
+            font-size: 16px;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .restart-btn:hover {
+            background: rgba(74, 90, 136, 0.9);
+            transform: scale(1.05);
+        }
+    </style>
 </head>
 <body>
     <div id="train-cabin">
         <canvas id="scene" width="1600" height="900"></canvas>
 
-        <!-- Dialogue Interface (Left-aligned) -->
-        <div id="dialogue-interface">
-            <div class="dialogue-content">
-                <p id="narrative-text" class="narrative-text">This cabin has collapsed into darkness</p>
-                <p id="question-text" class="question-text"></p>
+        <!-- Hoverable passenger zones (positioned over each passenger) -->
+        <div class="passenger-zone" id="passenger-0" style="left: 120px; top: 380px; width: 120px; height: 220px;"></div>
+        <div class="passenger-zone" id="passenger-1" style="left: 330px; top: 380px; width: 140px; height: 170px;"></div>
+        <div class="passenger-zone" id="passenger-2" style="left: 560px; top: 420px; width: 110px; height: 100px;"></div>
+        <div class="passenger-zone" id="passenger-3" style="left: 920px; top: 420px; width: 110px; height: 100px;"></div>
+        <div class="passenger-zone" id="passenger-4" style="left: 1130px; top: 380px; width: 140px; height: 170px;"></div>
+        <div class="passenger-zone" id="passenger-5" style="left: 1360px; top: 380px; width: 120px; height: 220px;"></div>
 
-                <div id="choices-container" class="choices-container hidden">
-                    <!-- Choices will be dynamically inserted here -->
-                </div>
+        <!-- Dialogue bubble -->
+        <div id="dialogue-bubble">
+            <p class="dialogue-text" id="dialogue-text"></p>
+            <p class="dialogue-question" id="dialogue-question"></p>
+            <div id="choices-container"></div>
+        </div>
+    </div>
 
-                <button id="continue-btn" class="continue-btn">Continue</button>
-            </div>
+    <!-- Ending overlay -->
+    <div id="ending-overlay">
+        <div class="ending-content">
+            <p class="ending-text" id="ending-text"></p>
+            <button class="restart-btn" onclick="restart()">Restart Journey</button>
         </div>
     </div>
 
