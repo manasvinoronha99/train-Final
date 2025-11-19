@@ -1,8 +1,4 @@
-/* ============================================
-   GLOBAL STYLES
-   Dark, dreamlike, atmospheric tone
-   ============================================ */
-
+/* Reset */
 * {
     margin: 0;
     padding: 0;
@@ -10,386 +6,189 @@
 }
 
 body {
-    font-family: 'Crimson Text', 'Georgia', serif;
-    background: #000;
+    font-family: 'Georgia', 'Times New Roman', serif;
     overflow: hidden;
-    cursor: default;
+    background: #0a0e1a;
+    color: #e8e8e8;
 }
 
-#experience-container {
+/* Train Cabin Container */
+#train-cabin {
     width: 100vw;
     height: 100vh;
     position: relative;
-    background: #0a0e1a;
+    background: #1e2430;
+    transition: filter 2s ease;
 }
 
-/* ============================================
-   SCENE MANAGEMENT
-   All scenes occupy full viewport
-   Only one visible at a time
-   ============================================ */
-
-.scene {
+/* Canvas for train cabin drawing */
+#cabin-canvas {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-    transition: opacity 1s ease-in-out, visibility 0s linear 1s;
-    z-index: 1;
-}
-
-.scene.active {
-    opacity: 1;
-    visibility: visible;
-    pointer-events: auto;
-    transition: opacity 1s ease-in-out, visibility 0s linear 0s;
-    z-index: 10;
-}
-
-canvas {
     display: block;
-    width: 100%;
-    height: 100%;
 }
 
-/* ============================================
-   SCENE 1: CABIN COLLAPSES INTO DARKNESS
-   Recreates first storyboard frame exactly
-   ============================================ */
-
-#scene-darkness {
-    background: #000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.darkness-overlay {
+/* Dialogue Interface - LEFT ALIGNED */
+#dialogue-interface {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background:
-        radial-gradient(ellipse at center, rgba(20, 20, 25, 0.3) 0%, #000 80%),
-        repeating-linear-gradient(
-            90deg,
-            rgba(10, 10, 10, 0.05) 0px,
-            rgba(5, 5, 5, 0.05) 2px,
-            transparent 2px,
-            transparent 4px
-        );
-    opacity: 0;
-    animation: revealFrame 4s ease-in-out 1s forwards;
-}
-
-@keyframes revealFrame {
-    to { opacity: 1; }
-}
-
-.darkness-text {
-    position: relative;
-    z-index: 10;
-    color: #8a8a92;
-    font-size: 22px;
-    font-weight: 300;
-    letter-spacing: 3px;
-    text-align: center;
-    opacity: 0;
-    animation: fadeInText 3s ease-in-out 2s forwards;
-}
-
-@keyframes fadeInText {
-    to { opacity: 1; }
-}
-
-/* ============================================
-   SCENE CAPTIONS
-   Small, unobtrusive, descriptive text
-   Positioned as shown in storyboard
-   ============================================ */
-
-.scene-caption {
-    position: absolute;
-    bottom: 40px;
-    left: 50%;
-    transform: translateX(-50%);
-    color: #6a6a72;
-    font-size: 13px;
-    font-weight: 300;
-    letter-spacing: 1.5px;
-    opacity: 0.7;
-    z-index: 100;
-}
-
-/* ============================================
-   SCENE 4: INTERACTION TYPES OVERLAY
-   Three boxes representing interaction possibilities
-   NOT interactive - visual representation only
-   ============================================ */
-
-.interaction-type-overlay {
-    position: absolute;
+    left: 5%;
     top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translateY(-50%);
+    width: 420px;
+    max-width: 35%;
+    z-index: 200;
+    background: rgba(30, 39, 64, 0.92);
+    border: 2px solid #4a5a88;
+    border-radius: 6px;
+    padding: 30px 25px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+    transition: opacity 0.5s ease;
+}
+
+.dialogue-content {
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    z-index: 50;
+    gap: 18px;
 }
 
-.type-box {
-    background: rgba(25, 30, 45, 0.85);
-    border: 1px solid rgba(80, 90, 120, 0.4);
-    border-radius: 8px;
-    padding: 18px 30px;
-    min-width: 320px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
-    opacity: 0;
-    animation: fadeInBox 1.5s ease-in-out forwards;
-}
-
-.type-box p {
-    color: #b0b5c0;
-    font-size: 15px;
-    font-weight: 300;
-    letter-spacing: 1px;
-    text-align: center;
-    margin: 0;
-}
-
-.type-variety {
-    animation-delay: 0.5s;
-    border-color: rgba(120, 130, 160, 0.5);
-}
-
-.type-good {
-    animation-delay: 1s;
-    border-color: rgba(140, 160, 180, 0.5);
-    background: rgba(30, 35, 50, 0.85);
-}
-
-.type-bad {
-    animation-delay: 1.5s;
-    border-color: rgba(60, 70, 90, 0.5);
-    background: rgba(15, 20, 30, 0.85);
-}
-
-@keyframes fadeInBox {
-    to { opacity: 1; }
-}
-
-/* ============================================
-   PASSENGERS CONTAINER
-   Invisible hover areas positioned over canvas-drawn silhouettes
-   ============================================ */
-
-#passengers-container {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 10;
-    pointer-events: none;
-}
-
-.passenger-hitbox {
-    position: absolute;
-    pointer-events: auto;
-    cursor: none;
-    /* Dimensions and positions set dynamically in JS */
-}
-
-/* ============================================
-   DIALOGUE BUBBLE
-   Cloud-like, semi-transparent, irregular edges
-   Attaches to hovered passenger
-   ============================================ */
-
-.dialogue-bubble {
-    position: absolute;
-    z-index: 100;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.8s ease-in-out;
-}
-
-.dialogue-bubble.visible {
-    opacity: 1;
-    pointer-events: auto;
-}
-
-.dialogue-bubble.hidden {
-    opacity: 0;
-    pointer-events: none;
-}
-
-.bubble-content {
-    background: rgba(25, 32, 48, 0.92);
-    border: 1px solid rgba(70, 80, 110, 0.5);
-    border-radius: 25px 25px 25px 8px;
-    padding: 22px 26px;
-    min-width: 320px;
-    max-width: 400px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7);
-    filter: blur(0.3px);
-    position: relative;
-}
-
-/* Cloud-like irregular edge effect */
-.bubble-content::before {
-    content: '';
-    position: absolute;
-    top: -2px;
-    left: -2px;
-    right: -2px;
-    bottom: -2px;
-    background: inherit;
-    border-radius: inherit;
-    filter: blur(4px);
-    opacity: 0.4;
-    z-index: -1;
-}
-
-.bubble-background {
-    color: #9a9fb0;
-    font-size: 14px;
-    line-height: 1.6;
-    margin-bottom: 12px;
-    font-weight: 300;
-}
-
-.bubble-question {
-    color: #c0c5d5;
+.narrative-text {
     font-size: 15px;
     line-height: 1.7;
-    margin-bottom: 16px;
-    font-style: italic;
-    font-weight: 400;
+    color: #d8dce8;
+    margin: 0;
+    font-weight: normal;
 }
 
-.bubble-choices {
+.question-text {
+    font-size: 15px;
+    line-height: 1.7;
+    color: #c8ccd8;
+    margin: 0;
+    font-style: italic;
+    min-height: 20px;
+}
+
+.question-text:empty {
+    display: none;
+}
+
+/* Choices Container */
+.choices-container {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
+    margin-top: 8px;
 }
 
-.choice-option {
-    background: rgba(40, 48, 68, 0.7);
-    border: 1px solid rgba(80, 90, 120, 0.4);
-    border-radius: 6px;
-    padding: 12px 16px;
-    color: #a8adb8;
-    font-size: 13px;
-    font-family: 'Crimson Text', 'Georgia', serif;
-    font-weight: 300;
-    text-align: left;
+.choices-container.hidden {
+    display: none;
+}
+
+.choice-btn {
+    background: rgba(42, 52, 78, 0.8);
+    color: #d8dce8;
+    border: 2px solid #4a5a88;
+    padding: 14px 18px;
+    font-size: 14px;
+    font-family: 'Georgia', 'Times New Roman', serif;
     cursor: pointer;
-    transition: all 0.4s ease;
-    letter-spacing: 0.5px;
+    border-radius: 4px;
+    text-align: left;
+    transition: all 0.3s ease;
+    line-height: 1.5;
 }
 
-.choice-option:hover {
-    background: rgba(50, 60, 85, 0.85);
-    border-color: rgba(100, 110, 140, 0.6);
-    color: #c8cdd8;
-    transform: translateX(3px);
+.choice-btn:hover {
+    background: rgba(58, 74, 106, 0.9);
+    border-color: #6a7ba8;
+    transform: translateX(4px);
 }
 
-.choice-option:active {
-    transform: translateX(3px) scale(0.98);
+.choice-btn:active {
+    transform: translateX(4px) scale(0.98);
 }
 
-/* ============================================
-   ENVIRONMENT BRIGHTNESS STATES
-   Applied to main interactive canvas scene
-   Gradual transitions based on cumulative choices
-   ============================================ */
-
-/* Default state */
-#scene-interactive {
-    filter: brightness(1) contrast(1);
-    transition: filter 4s ease-in-out;
+/* Continue Button */
+.continue-btn {
+    background: rgba(58, 74, 106, 0.8);
+    color: #e8e8e8;
+    border: 2px solid #6a7ba8;
+    padding: 12px 28px;
+    font-size: 15px;
+    font-family: 'Georgia', 'Times New Roman', serif;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    align-self: flex-start;
+    margin-top: 8px;
 }
 
-/* Slight brightening (after some positive choices) */
-#scene-interactive.env-lighter-1 {
+.continue-btn:hover {
+    background: rgba(74, 90, 136, 0.9);
+    transform: scale(1.03);
+}
+
+.continue-btn:active {
+    transform: scale(0.98);
+}
+
+.continue-btn.hidden {
+    display: none;
+}
+
+/* Environment brightness states */
+#train-cabin.env-lighter-1 {
     filter: brightness(1.1) contrast(0.98);
 }
 
-#scene-interactive.env-lighter-2 {
+#train-cabin.env-lighter-2 {
     filter: brightness(1.2) contrast(0.96);
 }
 
-#scene-interactive.env-lighter-3 {
+#train-cabin.env-lighter-3 {
     filter: brightness(1.3) contrast(0.94);
 }
 
-/* Slight darkening (after some negative choices) */
-#scene-interactive.env-darker-1 {
+#train-cabin.env-darker-1 {
     filter: brightness(0.9) contrast(1.05);
 }
 
-#scene-interactive.env-darker-2 {
+#train-cabin.env-darker-2 {
     filter: brightness(0.8) contrast(1.1);
 }
 
-#scene-interactive.env-darker-3 {
+#train-cabin.env-darker-3 {
     filter: brightness(0.7) contrast(1.15);
 }
 
-/* ============================================
-   RESPONSIVE ADJUSTMENTS
-   ============================================ */
-
+/* Responsive */
 @media (max-width: 1024px) {
-    .darkness-text {
-        font-size: 18px;
-        letter-spacing: 2px;
+    #dialogue-interface {
+        width: 380px;
+        max-width: 40%;
+        padding: 25px 20px;
     }
 
-    .scene-caption {
-        font-size: 11px;
-    }
-
-    .type-box {
-        min-width: 280px;
-        padding: 16px 24px;
-    }
-
-    .type-box p {
+    .narrative-text,
+    .question-text {
         font-size: 14px;
     }
 
-    .bubble-content {
-        min-width: 280px;
-        max-width: 340px;
-        padding: 20px 22px;
+    .choice-btn {
+        font-size: 13px;
+        padding: 12px 16px;
     }
 }
 
 @media (max-width: 768px) {
-    .darkness-text {
-        font-size: 16px;
-    }
-
-    .type-box {
-        min-width: 240px;
-        padding: 14px 20px;
-    }
-
-    .type-box p {
-        font-size: 13px;
-    }
-
-    .bubble-content {
-        min-width: 240px;
-        max-width: 300px;
+    #dialogue-interface {
+        width: 90%;
+        max-width: 90%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        padding: 20px 18px;
     }
 }

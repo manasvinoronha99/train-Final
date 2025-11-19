@@ -7,66 +7,23 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- Main container for entire experience -->
-    <div id="experience-container">
+    <!-- Main train cabin scene -->
+    <div id="train-cabin">
+        <canvas id="cabin-canvas"></canvas>
 
-        <!-- SCENE 1: Cabin collapses into darkness -->
-        <div id="scene-darkness" class="scene active">
-            <div class="darkness-overlay"></div>
-            <p class="darkness-text">This cabin has collapsed into darkness</p>
-        </div>
+        <!-- Dialogue Interface (Left-aligned) -->
+        <div id="dialogue-interface">
+            <div class="dialogue-content">
+                <p id="narrative-text" class="narrative-text">This cabin has collapsed into darkness</p>
+                <p id="question-text" class="question-text"></p>
 
-        <!-- SCENE 2: Black-and-white cabin interior -->
-        <div id="scene-bw-cabin" class="scene">
-            <canvas id="bw-cabin-canvas"></canvas>
-            <p class="scene-caption">Black and White → Cabin Interior</p>
-        </div>
-
-        <!-- SCENE 3: Interior with initial subtle coloring -->
-        <div id="scene-color-intro" class="scene">
-            <canvas id="color-cabin-canvas"></canvas>
-            <p class="scene-caption">Interior with initial start coloring</p>
-        </div>
-
-        <!-- SCENE 4: Representation of interaction types (visual only, not interactive) -->
-        <div id="scene-interaction-types" class="scene">
-            <canvas id="types-cabin-canvas"></canvas>
-            <div class="interaction-type-overlay">
-                <div class="type-box type-variety">
-                    <p>Variety of possible responses</p>
+                <div id="choices-container" class="choices-container hidden">
+                    <!-- Choices will be dynamically inserted here -->
                 </div>
-                <div class="type-box type-good">
-                    <p>Only good responses</p>
-                </div>
-                <div class="type-box type-bad">
-                    <p>Only bad responses</p>
-                </div>
+
+                <button id="continue-btn" class="continue-btn">Continue</button>
             </div>
         </div>
-
-        <!-- MAIN INTERACTIVE SCENE: Full cabin with hoverable passengers -->
-        <div id="scene-interactive" class="scene">
-            <canvas id="main-cabin-canvas"></canvas>
-
-            <!-- Passenger interaction areas (invisible, hover-detectable) -->
-            <div id="passengers-container">
-                <!-- Passengers will be dynamically positioned -->
-            </div>
-
-            <!-- Cloud-like dialogue bubble (hidden by default) -->
-            <div id="dialogue-bubble" class="dialogue-bubble hidden">
-                <div class="bubble-content">
-                    <p class="bubble-background"></p>
-                    <p class="bubble-question"></p>
-                    <div class="bubble-choices">
-                        <button class="choice-option" data-value="positive"></button>
-                        <button class="choice-option" data-value="neutral"></button>
-                        <button class="choice-option" data-value="negative"></button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
     </div>
 
     <script src="script.js"></script>
