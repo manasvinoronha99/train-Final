@@ -3,187 +3,1175 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Train Cabin Narrative</title>
+    <title>Train Narrative</title>
     <style>
-        body {
+        * {
             margin: 0;
-            background: #2f3150;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            font-family: 'Georgia', 'Times New Roman', serif;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        #train-cabin {
-            position: relative;
-            transition: filter 2s ease;
+        body {
+            overflow: hidden;
+            font-family: 'Georgia', serif;
+            background: #0a0e1a;
         }
 
-        canvas {
-            background: #2f3150;
+        #canvas {
             display: block;
+            cursor: default;
         }
 
-        /* Hoverable passenger areas */
-        .passenger-zone {
+        #textOverlay {
             position: absolute;
-            cursor: pointer;
-            opacity: 0; /* Invisible but hoverable */
-        }
-
-        .passenger-zone:hover {
-            opacity: 0.1;
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        /* Dialogue bubble */
-        #dialogue-bubble {
-            position: absolute;
-            background: rgba(30, 39, 64, 0.95);
-            border: 2px solid #4a5a88;
-            border-radius: 12px;
-            padding: 25px;
-            min-width: 350px;
+            opacity: 0;
+            transition: opacity 0.5s ease;
             max-width: 400px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
-            display: none;
-            z-index: 1000;
+            padding: 20px;
+            background: rgba(25, 35, 60, 0.85);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            color: #b8c5d8;
+            font-size: 14px;
+            line-height: 1.6;
+            pointer-events: none;
         }
 
-        #dialogue-bubble.visible {
-            display: block;
+        #textOverlay.visible {
+            opacity: 1;
+            pointer-events: all;
         }
 
-        .dialogue-text {
-            color: #d8dce8;
-            font-size: 15px;
-            line-height: 1.7;
+        #textOverlay.visible * {
+            pointer-events: all;
+        }
+
+        .narrative-text {
             margin-bottom: 15px;
         }
 
-        .dialogue-question {
-            color: #c8ccd8;
-            font-size: 15px;
-            line-height: 1.7;
+        .question {
+            margin-top: 10px;
+            margin-bottom: 15px;
             font-style: italic;
-            margin-bottom: 18px;
+            color: #d0dae8;
         }
 
-        .choice-btn {
-            display: block;
-            width: 100%;
-            background: rgba(42, 52, 78, 0.8);
-            color: #d8dce8;
-            border: 2px solid #4a5a88;
-            padding: 12px 16px;
-            font-size: 14px;
-            font-family: 'Georgia', 'Times New Roman', serif;
-            cursor: pointer;
-            border-radius: 4px;
-            text-align: left;
-            margin-bottom: 10px;
-            transition: all 0.3s ease;
-        }
-
-        .choice-btn:hover {
-            background: rgba(58, 74, 106, 0.9);
-            border-color: #6a7ba8;
-            transform: translateX(4px);
-        }
-
-        .choice-btn:last-child {
-            margin-bottom: 0;
-        }
-
-        /* Environment states */
-        #train-cabin.env-lighter-1 { filter: brightness(1.15); }
-        #train-cabin.env-lighter-2 { filter: brightness(1.3); }
-        #train-cabin.env-lighter-3 { filter: brightness(1.5); }
-        #train-cabin.env-darker-1 { filter: brightness(0.85); }
-        #train-cabin.env-darker-2 { filter: brightness(0.7); }
-        #train-cabin.env-darker-3 { filter: brightness(0.5); }
-
-        /* Ending overlay */
-        #ending-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
-        }
-
-        #ending-overlay.visible {
+        .responses {
             display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
 
-        .ending-content {
-            background: rgba(30, 39, 64, 0.95);
-            border: 2px solid #4a5a88;
-            border-radius: 12px;
-            padding: 40px;
-            max-width: 500px;
-            text-align: center;
-        }
-
-        .ending-text {
-            color: #d8dce8;
-            font-size: 18px;
-            line-height: 1.8;
-            margin-bottom: 25px;
-        }
-
-        .restart-btn {
-            background: rgba(58, 74, 106, 0.8);
-            color: #e8e8e8;
-            border: 2px solid #6a7ba8;
-            padding: 12px 30px;
-            font-size: 16px;
-            font-family: 'Georgia', 'Times New Roman', serif;
+        .response-option {
+            padding: 12px 16px;
+            background: rgba(40, 50, 75, 0.6);
+            border: 1px solid rgba(100, 120, 150, 0.3);
+            border-radius: 8px;
             cursor: pointer;
-            border-radius: 4px;
             transition: all 0.3s ease;
+            color: #c8d4e3;
+            font-size: 13px;
         }
 
-        .restart-btn:hover {
-            background: rgba(74, 90, 136, 0.9);
-            transform: scale(1.05);
+        .response-option:hover {
+            background: rgba(50, 65, 95, 0.8);
+            border-color: rgba(120, 140, 170, 0.5);
+            transform: translateX(5px);
         }
     </style>
 </head>
 <body>
-    <div id="train-cabin">
-        <canvas id="scene" width="1600" height="900"></canvas>
-
-        <!-- Hoverable passenger zones (positioned over each passenger) -->
-        <div class="passenger-zone" id="passenger-0" style="left: 120px; top: 380px; width: 120px; height: 220px;"></div>
-        <div class="passenger-zone" id="passenger-1" style="left: 330px; top: 380px; width: 140px; height: 170px;"></div>
-        <div class="passenger-zone" id="passenger-2" style="left: 560px; top: 420px; width: 110px; height: 100px;"></div>
-        <div class="passenger-zone" id="passenger-3" style="left: 920px; top: 420px; width: 110px; height: 100px;"></div>
-        <div class="passenger-zone" id="passenger-4" style="left: 1130px; top: 380px; width: 140px; height: 170px;"></div>
-        <div class="passenger-zone" id="passenger-5" style="left: 1360px; top: 380px; width: 120px; height: 220px;"></div>
-
-        <!-- Dialogue bubble -->
-        <div id="dialogue-bubble">
-            <p class="dialogue-text" id="dialogue-text"></p>
-            <p class="dialogue-question" id="dialogue-question"></p>
-            <div id="choices-container"></div>
-        </div>
+    <canvas id="canvas"></canvas>
+    <div id="textOverlay">
+        <div class="narrative-text" id="narrativeText"></div>
+        <div class="question" id="questionText"></div>
+        <div class="responses" id="responsesContainer"></div>
     </div>
 
-    <!-- Ending overlay -->
-    <div id="ending-overlay">
-        <div class="ending-content">
-            <p class="ending-text" id="ending-text"></p>
-            <button class="restart-btn" onclick="restart()">Restart Journey</button>
-        </div>
-    </div>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const textOverlay = document.getElementById('textOverlay');
 
-    <script src="script.js"></script>
+        // Canvas setup
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // Game state
+        let environmentBrightness = 0.15; // Start very dark (0 = black, 1 = bright)
+        let positiveChoices = 0;
+        let totalChoices = 0;
+        let hoveredFigure = null;
+        let isInteracting = false;
+        let allFiguresInteracted = false;
+        let isDoorGlowing = false;
+        let doorGlowIntensity = 0;
+        let doorGlowProgress = 0;
+        let isTransitioningCabins = false;
+        let currentCabin = 1;
+
+        // Figure narratives - same for all cabins
+        const figureNarratives = [
+            {
+                narrative: "This figure sits hunched, clutching something close. Their silhouette trembles slightly, as if cold or afraid.",
+                question: "What do you carry with you on this journey?",
+                responses: [
+                    { text: "Hope for what lies ahead", positive: true },
+                    { text: "Regrets I cannot escape", positive: false },
+                    { text: "The weight of forgotten promises", positive: false }
+                ]
+            },
+            {
+                narrative: "A tall figure stands in the aisle, gazing toward the distant door. They seem to be waiting for something.",
+                question: "Do you believe we choose our destinations?",
+                responses: [
+                    { text: "We make our own path forward", positive: true },
+                    { text: "We are merely passengers to fate", positive: false },
+                    { text: "The tracks were laid long before us", positive: false }
+                ]
+            },
+            {
+                narrative: "Two figures sit close together, their forms almost merging in the darkness. One appears to whisper to the other.",
+                question: "What do you seek in the company of others?",
+                responses: [
+                    { text: "Understanding and connection", positive: true },
+                    { text: "Distraction from the void", positive: false },
+                    { text: "Proof that I am not alone in suffering", positive: false }
+                ]
+            },
+            {
+                narrative: "A small figure curled against the window. Their reflection seems darker than they are.",
+                question: "When you look at your reflection, what looks back?",
+                responses: [
+                    { text: "Someone still learning and growing", positive: true },
+                    { text: "A stranger I no longer recognize", positive: false },
+                    { text: "All the versions of myself I've failed", positive: false }
+                ]
+            },
+            {
+                narrative: "This figure stands perfectly still, hands at their sides. They haven't moved since you arrived.",
+                question: "What keeps you moving forward?",
+                responses: [
+                    { text: "Curiosity about what comes next", positive: true },
+                    { text: "Fear of standing still", positive: false },
+                    { text: "Nothing—I am merely in motion", positive: false }
+                ]
+            }
+        ];
+
+        // Generate figure positions for current cabin - DIFFERENT for each cabin
+        function generateFigures(cabinNumber) {
+            // Different base positions for each cabin
+            const positionSets = [
+                // Cabin 1
+                [
+                    { x: 0.25, y: 0.55, scale: 0.8 },
+                    { x: 0.45, y: 0.48, scale: 1.0 },
+                    { x: 0.72, y: 0.52, scale: 0.85 },
+                    { x: 0.15, y: 0.62, scale: 0.7 },
+                    { x: 0.60, y: 0.58, scale: 0.9 }
+                ],
+                // Cabin 2
+                [
+                    { x: 0.30, y: 0.50, scale: 0.9 },
+                    { x: 0.68, y: 0.54, scale: 0.75 },
+                    { x: 0.18, y: 0.58, scale: 0.85 },
+                    { x: 0.50, y: 0.46, scale: 1.0 },
+                    { x: 0.70, y: 0.62, scale: 0.7 }
+                ],
+                // Cabin 3
+                [
+                    { x: 0.22, y: 0.53, scale: 0.85 },
+                    { x: 0.52, y: 0.60, scale: 0.8 },
+                    { x: 0.75, y: 0.48, scale: 0.9 },
+                    { x: 0.38, y: 0.52, scale: 0.95 },
+                    { x: 0.65, y: 0.56, scale: 0.75 }
+                ]
+            ];
+
+            // Cycle through position sets
+            const positions = positionSets[(cabinNumber - 1) % positionSets.length];
+
+            return figureNarratives.map((narrative, i) => ({
+                ...positions[i],
+                brightness: 0.2,
+                interacted: false,
+                ...narrative
+            }));
+        }
+
+        // Figure data - generated for each cabin
+        let figures = generateFigures(currentCabin);
+
+
+        // Mouse tracking
+        let mouseX = 0;
+        let mouseY = 0;
+        let isOverTextBox = false;
+
+        canvas.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        // Track when mouse is over text overlay
+        textOverlay.addEventListener('mouseenter', () => {
+            isOverTextBox = true;
+        });
+
+        textOverlay.addEventListener('mouseleave', () => {
+            isOverTextBox = false;
+            hoveredFigure = null;
+            hideTextBox();
+        });
+
+        // Handle door clicks to move to next cabin
+        canvas.addEventListener('click', (e) => {
+            if (!isDoorGlowing || isTransitioningCabins) return;
+
+            const w = canvas.width;
+            const h = canvas.height;
+            const vanishX = w * 0.5;
+            const vanishY = h * 0.45;
+
+            // Door bounds
+            const doorLeft = vanishX - 35;
+            const doorRight = vanishX + 35;
+            const doorTop = vanishY - 60;
+            const doorBottom = vanishY + 20;
+
+            // Check if click is on door
+            if (mouseX >= doorLeft && mouseX <= doorRight &&
+                mouseY >= doorTop && mouseY <= doorBottom) {
+                transitionToNextCabin();
+            }
+        });
+
+        // Perspective helper
+        function getPerspectiveScale(depth) {
+            return 1 / (1 + depth * 0.8);
+        }
+
+        // Draw train interior
+        function drawTrainInterior() {
+            const w = canvas.width;
+            const h = canvas.height;
+            const vanishX = w * 0.5;
+            const vanishY = h * 0.45;
+
+            // Color transition from blue to warm orange/yellow
+            // environmentBrightness: 0.15 (cold start) to 1.0 (warm end)
+            // Normalize to 0-1 range for color mixing
+            const warmth = Math.max(0, Math.min(1, (environmentBrightness - 0.15) / 0.85));
+
+            // Base colors - solid, opaque transitions
+            // Cold: deep blue-gray (20, 25, 45)
+            // Warm: orange-yellow (220, 180, 100)
+            const baseR = Math.floor(20 + warmth * 200);
+            const baseG = Math.floor(25 + warmth * 155);
+            const baseB = Math.floor(45 + warmth * 55);
+
+            ctx.fillStyle = `rgb(${baseR}, ${baseG}, ${baseB})`;
+            ctx.fillRect(0, 0, w, h);
+
+            // Define key perspective anchor points
+            const floorLeftFront = { x: w * 0.22, y: h };
+            const floorRightFront = { x: w * 0.78, y: h };
+            const floorLeftBack = { x: vanishX - 60, y: vanishY + 30 };
+            const floorRightBack = { x: vanishX + 60, y: vanishY + 30 };
+
+            const ceilingLeftFront = { x: w * 0.15, y: 0 };
+            const ceilingRightFront = { x: w * 0.85, y: 0 };
+            const ceilingLeftBack = { x: vanishX - 70, y: vanishY - 80 };
+            const ceilingRightBack = { x: vanishX + 70, y: vanishY - 80 };
+
+            // Helper function to interpolate along perspective line
+            function perspectivePoint(frontPoint, backPoint, depth) {
+                return {
+                    x: frontPoint.x + (backPoint.x - frontPoint.x) * depth,
+                    y: frontPoint.y + (backPoint.y - frontPoint.y) * depth
+                };
+            }
+
+            // ===== FLOOR - central aisle =====
+            const floorR = Math.floor(25 + warmth * 175);
+            const floorG = Math.floor(28 + warmth * 132);
+            const floorB = Math.floor(50 + warmth * 40);
+
+            ctx.fillStyle = `rgb(${floorR}, ${floorG}, ${floorB})`;
+            ctx.beginPath();
+            ctx.moveTo(floorLeftFront.x, floorLeftFront.y);
+            ctx.lineTo(floorLeftBack.x, floorLeftBack.y);
+            ctx.lineTo(floorRightBack.x, floorRightBack.y);
+            ctx.lineTo(floorRightFront.x, floorRightFront.y);
+            ctx.closePath();
+            ctx.fill();
+
+            // Floor shine - subtle highlight
+            const floorShineOpacity = 0.15 + warmth * 0.15;
+            const floorGrad = ctx.createLinearGradient(w * 0.5, h, w * 0.5, vanishY + 30);
+            floorGrad.addColorStop(0, `rgba(255, 240, 200, ${floorShineOpacity})`);
+            floorGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+            ctx.fillStyle = floorGrad;
+            ctx.fillRect(floorLeftFront.x, vanishY + 30, floorRightFront.x - floorLeftFront.x, h - vanishY - 30);
+
+            // ===== CEILING =====
+            const ceilingR = Math.floor(18 + warmth * 172);
+            const ceilingG = Math.floor(22 + warmth * 128);
+            const ceilingB = Math.floor(42 + warmth * 43);
+
+            ctx.fillStyle = `rgb(${ceilingR}, ${ceilingG}, ${ceilingB})`;
+            ctx.beginPath();
+            ctx.moveTo(ceilingLeftFront.x, ceilingLeftFront.y);
+            ctx.lineTo(ceilingLeftBack.x, ceilingLeftBack.y);
+            ctx.lineTo(ceilingRightBack.x, ceilingRightBack.y);
+            ctx.lineTo(ceilingRightFront.x, ceilingRightFront.y);
+            ctx.closePath();
+            ctx.fill();
+
+            // Ceiling panels following perspective
+            const ceilingDetailR = Math.floor(ceilingR + 25 + warmth * 35);
+            const ceilingDetailG = Math.floor(ceilingG + 25 + warmth * 35);
+            const ceilingDetailB = Math.floor(ceilingB + 25 + warmth * 20);
+            const ceilingLineOpacity = 0.4 + warmth * 0.3;
+
+            ctx.strokeStyle = `rgba(${ceilingDetailR}, ${ceilingDetailG}, ${ceilingDetailB}, ${ceilingLineOpacity})`;
+            ctx.lineWidth = 2;
+            for (let i = 0; i <= 8; i++) {
+                const depth = i / 8;
+                const leftPt = perspectivePoint(ceilingLeftFront, ceilingLeftBack, depth);
+                const rightPt = perspectivePoint(ceilingRightFront, ceilingRightBack, depth);
+                ctx.beginPath();
+                ctx.moveTo(leftPt.x, leftPt.y);
+                ctx.lineTo(rightPt.x, rightPt.y);
+                ctx.stroke();
+            }
+
+            // ===== LEFT SIDE =====
+            const wallR = Math.floor(28 + warmth * 182);
+            const wallG = Math.floor(32 + warmth * 133);
+            const wallB = Math.floor(52 + warmth * 43);
+
+            const wallLeftTop = ceilingLeftFront;
+            const wallLeftBottom = floorLeftFront;
+
+            // Left wall - solid color
+            ctx.fillStyle = `rgb(${wallR}, ${wallG}, ${wallB})`;
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(wallLeftTop.x, wallLeftTop.y);
+            ctx.lineTo(ceilingLeftBack.x, ceilingLeftBack.y);
+            ctx.lineTo(floorLeftBack.x, floorLeftBack.y);
+            ctx.lineTo(wallLeftBottom.x, wallLeftBottom.y);
+            ctx.lineTo(0, h);
+            ctx.closePath();
+            ctx.fill();
+
+            // Left windows following perspective
+            const windowR = Math.floor(50 + warmth * 190);
+            const windowG = Math.floor(60 + warmth * 150);
+            const windowB = Math.floor(95 + warmth * 35);
+            const windowAlpha = 0.6 + warmth * 0.2;
+
+            // Define window rows with proper perspective anchors
+            const leftWallTop = { x: w * 0.05, y: h * 0.15 };
+            const leftWallTopBack = { x: ceilingLeftBack.x - 12, y: ceilingLeftBack.y + 18 };
+            const leftWallBottom = { x: w * 0.05, y: h * 0.38 };
+            const leftWallBottomBack = { x: ceilingLeftBack.x - 12, y: ceilingLeftBack.y + 70 };
+
+            for (let i = 0; i < 4; i++) {
+                const depth1 = i / 4;
+                const depth2 = (i + 0.95) / 4;
+
+                const topLeft = perspectivePoint(leftWallTop, leftWallTopBack, depth1);
+                const topRight = perspectivePoint(leftWallTop, leftWallTopBack, depth2);
+                const bottomLeft = perspectivePoint(leftWallBottom, leftWallBottomBack, depth1);
+                const bottomRight = perspectivePoint(leftWallBottom, leftWallBottomBack, depth2);
+
+                // Window glass
+                ctx.fillStyle = `rgba(${windowR}, ${windowG}, ${windowB}, ${windowAlpha})`;
+                ctx.beginPath();
+                ctx.moveTo(topLeft.x, topLeft.y);
+                ctx.lineTo(topRight.x, topRight.y);
+                ctx.lineTo(bottomRight.x, bottomRight.y);
+                ctx.lineTo(bottomLeft.x, bottomLeft.y);
+                ctx.closePath();
+                ctx.fill();
+
+                // Window frame
+                const frameR = Math.floor(wallR + 35);
+                const frameG = Math.floor(wallG + 35);
+                const frameB = Math.floor(wallB + 25);
+                ctx.strokeStyle = `rgba(${frameR}, ${frameG}, ${frameB}, 0.8)`;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+
+            // Left bench seats following perspective - 3D bench appearance
+            const seatR = Math.floor(35 + warmth * 145);
+            const seatG = Math.floor(42 + warmth * 98);
+            const seatB = Math.floor(65 + warmth * 15);
+
+            // Define bench dimensions with proper 3D perspective
+            const leftSeatTopFront = { x: w * 0.05, y: h * 0.48 };
+            const leftSeatTopBack = { x: floorLeftBack.x - 12, y: floorLeftBack.y - 32 };
+            const leftSeatBottomFront = { x: w * 0.05, y: h * 0.68 };
+            const leftSeatBottomBack = { x: floorLeftBack.x - 12, y: floorLeftBack.y - 5 };
+
+            // Floor level for bench base
+            const leftBenchFloorFront = { x: w * 0.05, y: h };
+            const leftBenchFloorBack = { x: floorLeftBack.x - 12, y: floorLeftBack.y };
+
+            // Bench extends into the aisle (3D depth)
+            const benchDepthFront = 55;
+
+            for (let i = 0; i < 4; i++) {
+                const depth1 = i / 4;
+                const depth2 = (i + 1) / 4;
+
+                // Scale decreases with depth
+                const scale1 = 1 - depth1 * 0.65;
+                const scale2 = 1 - depth2 * 0.65;
+
+                // Backrest points
+                const backTopLeft = perspectivePoint(leftSeatTopFront, leftSeatTopBack, depth1);
+                const backTopRight = perspectivePoint(leftSeatTopFront, leftSeatTopBack, depth2);
+                const backBottomLeft = perspectivePoint(leftSeatBottomFront, leftSeatBottomBack, depth1);
+                const backBottomRight = perspectivePoint(leftSeatBottomFront, leftSeatBottomBack, depth2);
+
+                // Bench seat surface points
+                const seatFrontLeft = { x: backBottomLeft.x + benchDepthFront * scale1, y: backBottomLeft.y };
+                const seatFrontRight = { x: backBottomRight.x + benchDepthFront * scale2, y: backBottomRight.y };
+                const seatBackDepth1 = benchDepthFront * scale1 * 0.25;
+                const seatBackDepth2 = benchDepthFront * scale2 * 0.25;
+                const seatBackLeft = { x: backBottomLeft.x + seatBackDepth1, y: backBottomLeft.y };
+                const seatBackRight = { x: backBottomRight.x + seatBackDepth2, y: backBottomRight.y };
+
+                // Bottom of bench
+                const floorLeft = perspectivePoint(leftBenchFloorFront, leftBenchFloorBack, depth1);
+                const floorRight = perspectivePoint(leftBenchFloorFront, leftBenchFloorBack, depth2);
+                const benchBottomFrontLeft = { x: seatFrontLeft.x, y: floorLeft.y };
+                const benchBottomFrontRight = { x: seatFrontRight.x, y: floorRight.y };
+                const benchBottomBackLeft = { x: seatBackLeft.x, y: floorLeft.y };
+                const benchBottomBackRight = { x: seatBackRight.x, y: floorRight.y };
+
+                // Draw backrest
+                const backrestR = Math.floor(seatR - 15);
+                const backrestG = Math.floor(seatG - 10);
+                const backrestB = Math.floor(seatB + 5);
+                ctx.fillStyle = `rgb(${backrestR}, ${backrestG}, ${backrestB})`;
+                ctx.beginPath();
+                ctx.moveTo(backTopLeft.x, backTopLeft.y);
+                ctx.lineTo(backTopRight.x, backTopRight.y);
+                ctx.lineTo(backBottomRight.x, backBottomRight.y);
+                ctx.lineTo(backBottomLeft.x, backBottomLeft.y);
+                ctx.closePath();
+                ctx.fill();
+
+                // Draw bench seat top surface
+                ctx.fillStyle = `rgb(${seatR}, ${seatG}, ${seatB})`;
+                ctx.beginPath();
+                ctx.moveTo(seatBackLeft.x, seatBackLeft.y);
+                ctx.lineTo(seatBackRight.x, seatBackRight.y);
+                ctx.lineTo(seatFrontRight.x, seatFrontRight.y);
+                ctx.lineTo(seatFrontLeft.x, seatFrontLeft.y);
+                ctx.closePath();
+                ctx.fill();
+
+                // Draw bench front face
+                const frontR = Math.floor(seatR - 25);
+                const frontG = Math.floor(seatG - 20);
+                const frontB = Math.floor(seatB - 5);
+                ctx.fillStyle = `rgb(${frontR}, ${frontG}, ${frontB})`;
+                ctx.beginPath();
+                ctx.moveTo(seatFrontLeft.x, seatFrontLeft.y);
+                ctx.lineTo(seatFrontRight.x, seatFrontRight.y);
+                ctx.lineTo(benchBottomFrontRight.x, benchBottomFrontRight.y);
+                ctx.lineTo(benchBottomFrontLeft.x, benchBottomFrontLeft.y);
+                ctx.closePath();
+                ctx.fill();
+
+                // Draw bench bottom edge
+                const bottomR = Math.floor(seatR - 35);
+                const bottomG = Math.floor(seatG - 30);
+                const bottomB = Math.floor(seatB - 10);
+                ctx.fillStyle = `rgb(${bottomR}, ${bottomG}, ${bottomB})`;
+                ctx.beginPath();
+                ctx.moveTo(benchBottomBackLeft.x, benchBottomBackLeft.y);
+                ctx.lineTo(benchBottomBackRight.x, benchBottomBackRight.y);
+                ctx.lineTo(benchBottomFrontRight.x, benchBottomFrontRight.y);
+                ctx.lineTo(benchBottomFrontLeft.x, benchBottomFrontLeft.y);
+                ctx.closePath();
+                ctx.fill();
+            }
+
+            // ===== RIGHT SIDE =====
+            const wallRightTop = ceilingRightFront;
+            const wallRightBottom = floorRightFront;
+
+            // Right wall - solid color
+            ctx.fillStyle = `rgb(${wallR}, ${wallG}, ${wallB})`;
+            ctx.beginPath();
+            ctx.moveTo(w, 0);
+            ctx.lineTo(wallRightTop.x, wallRightTop.y);
+            ctx.lineTo(ceilingRightBack.x, ceilingRightBack.y);
+            ctx.lineTo(floorRightBack.x, floorRightBack.y);
+            ctx.lineTo(wallRightBottom.x, wallRightBottom.y);
+            ctx.lineTo(w, h);
+            ctx.closePath();
+            ctx.fill();
+
+            // Right windows following perspective
+            const rightWallTop = { x: w * 0.95, y: h * 0.15 };
+            const rightWallTopBack = { x: ceilingRightBack.x + 12, y: ceilingRightBack.y + 18 };
+            const rightWallBottom = { x: w * 0.95, y: h * 0.38 };
+            const rightWallBottomBack = { x: ceilingRightBack.x + 12, y: ceilingRightBack.y + 70 };
+
+            for (let i = 0; i < 4; i++) {
+                const depth1 = i / 4;
+                const depth2 = (i + 0.95) / 4;
+
+                const topLeft = perspectivePoint(rightWallTop, rightWallTopBack, depth1);
+                const topRight = perspectivePoint(rightWallTop, rightWallTopBack, depth2);
+                const bottomLeft = perspectivePoint(rightWallBottom, rightWallBottomBack, depth1);
+                const bottomRight = perspectivePoint(rightWallBottom, rightWallBottomBack, depth2);
+
+                // Window glass
+                ctx.fillStyle = `rgba(${windowR}, ${windowG}, ${windowB}, ${windowAlpha})`;
+                ctx.beginPath();
+                ctx.moveTo(topLeft.x, topLeft.y);
+                ctx.lineTo(topRight.x, topRight.y);
+                ctx.lineTo(bottomRight.x, bottomRight.y);
+                ctx.lineTo(bottomLeft.x, bottomLeft.y);
+                ctx.closePath();
+                ctx.fill();
+
+                // Window frame
+                const frameR = Math.floor(wallR + 35);
+                const frameG = Math.floor(wallG + 35);
+                const frameB = Math.floor(wallB + 25);
+                ctx.strokeStyle = `rgba(${frameR}, ${frameG}, ${frameB}, 0.8)`;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+
+            // Right bench seats following perspective - 3D bench appearance
+            const rightSeatTopFront = { x: w * 0.95, y: h * 0.48 };
+            const rightSeatTopBack = { x: floorRightBack.x + 12, y: floorRightBack.y - 32 };
+            const rightSeatBottomFront = { x: w * 0.95, y: h * 0.68 };
+            const rightSeatBottomBack = { x: floorRightBack.x + 12, y: floorRightBack.y - 5 };
+
+            // Floor level for bench base
+            const rightBenchFloorFront = { x: w * 0.95, y: h };
+            const rightBenchFloorBack = { x: floorRightBack.x + 12, y: floorRightBack.y };
+
+            // Bench extends into the aisle (3D depth)
+            const benchDepthRightFront = 55;
+
+            for (let i = 0; i < 4; i++) {
+                const depth1 = i / 4;
+                const depth2 = (i + 1) / 4;
+
+                // Scale decreases with depth
+                const scale1 = 1 - depth1 * 0.65;
+                const scale2 = 1 - depth2 * 0.65;
+
+                // Backrest points
+                const backTopLeft = perspectivePoint(rightSeatTopFront, rightSeatTopBack, depth1);
+                const backTopRight = perspectivePoint(rightSeatTopFront, rightSeatTopBack, depth2);
+                const backBottomLeft = perspectivePoint(rightSeatBottomFront, rightSeatBottomBack, depth1);
+                const backBottomRight = perspectivePoint(rightSeatBottomFront, rightSeatBottomBack, depth2);
+
+                // Bench seat surface points
+                const seatFrontLeft = { x: backBottomLeft.x - benchDepthRightFront * scale1, y: backBottomLeft.y };
+                const seatFrontRight = { x: backBottomRight.x - benchDepthRightFront * scale2, y: backBottomRight.y };
+                const seatBackDepth1 = benchDepthRightFront * scale1 * 0.25;
+                const seatBackDepth2 = benchDepthRightFront * scale2 * 0.25;
+                const seatBackLeft = { x: backBottomLeft.x - seatBackDepth1, y: backBottomLeft.y };
+                const seatBackRight = { x: backBottomRight.x - seatBackDepth2, y: backBottomRight.y };
+
+                // Bottom of bench
+                const floorLeft = perspectivePoint(rightBenchFloorFront, rightBenchFloorBack, depth1);
+                const floorRight = perspectivePoint(rightBenchFloorFront, rightBenchFloorBack, depth2);
+                const benchBottomFrontLeft = { x: seatFrontLeft.x, y: floorLeft.y };
+                const benchBottomFrontRight = { x: seatFrontRight.x, y: floorRight.y };
+                const benchBottomBackLeft = { x: seatBackLeft.x, y: floorLeft.y };
+                const benchBottomBackRight = { x: seatBackRight.x, y: floorRight.y };
+
+                // Draw backrest
+                const backrestR = Math.floor(seatR - 15);
+                const backrestG = Math.floor(seatG - 10);
+                const backrestB = Math.floor(seatB + 5);
+                ctx.fillStyle = `rgb(${backrestR}, ${backrestG}, ${backrestB})`;
+                ctx.beginPath();
+                ctx.moveTo(backTopLeft.x, backTopLeft.y);
+                ctx.lineTo(backTopRight.x, backTopRight.y);
+                ctx.lineTo(backBottomRight.x, backBottomRight.y);
+                ctx.lineTo(backBottomLeft.x, backBottomLeft.y);
+                ctx.closePath();
+                ctx.fill();
+
+                // Draw bench seat top surface
+                ctx.fillStyle = `rgb(${seatR}, ${seatG}, ${seatB})`;
+                ctx.beginPath();
+                ctx.moveTo(seatBackLeft.x, seatBackLeft.y);
+                ctx.lineTo(seatBackRight.x, seatBackRight.y);
+                ctx.lineTo(seatFrontRight.x, seatFrontRight.y);
+                ctx.lineTo(seatFrontLeft.x, seatFrontLeft.y);
+                ctx.closePath();
+                ctx.fill();
+
+                // Draw bench front face
+                const frontR = Math.floor(seatR - 25);
+                const frontG = Math.floor(seatG - 20);
+                const frontB = Math.floor(seatB - 5);
+                ctx.fillStyle = `rgb(${frontR}, ${frontG}, ${frontB})`;
+                ctx.beginPath();
+                ctx.moveTo(seatFrontLeft.x, seatFrontLeft.y);
+                ctx.lineTo(seatFrontRight.x, seatFrontRight.y);
+                ctx.lineTo(benchBottomFrontRight.x, benchBottomFrontRight.y);
+                ctx.lineTo(benchBottomFrontLeft.x, benchBottomFrontLeft.y);
+                ctx.closePath();
+                ctx.fill();
+
+                // Draw bench bottom edge
+                const bottomR = Math.floor(seatR - 35);
+                const bottomG = Math.floor(seatG - 30);
+                const bottomB = Math.floor(seatB - 10);
+                ctx.fillStyle = `rgb(${bottomR}, ${bottomG}, ${bottomB})`;
+                ctx.beginPath();
+                ctx.moveTo(benchBottomBackLeft.x, benchBottomBackLeft.y);
+                ctx.lineTo(benchBottomBackRight.x, benchBottomBackRight.y);
+                ctx.lineTo(benchBottomFrontRight.x, benchBottomFrontRight.y);
+                ctx.lineTo(benchBottomFrontLeft.x, benchBottomFrontLeft.y);
+                ctx.closePath();
+                ctx.fill();
+            }
+
+            // ===== OVERHEAD HANDRAILS following perspective =====
+            const railR = Math.floor(40 + warmth * 160);
+            const railG = Math.floor(48 + warmth * 117);
+            const railB = Math.floor(75 + warmth * 20);
+
+            const railLeftFront = { x: floorLeftFront.x + 50, y: h * 0.12 };
+            const railRightFront = { x: floorRightFront.x - 50, y: h * 0.12 };
+            const railLeftBack = { x: floorLeftBack.x + 20, y: ceilingLeftBack.y + 35 };
+            const railRightBack = { x: floorRightBack.x - 20, y: ceilingRightBack.y + 35 };
+
+            // Horizontal rails
+            for (let i = 0; i < 6; i++) {
+                const depth = i / 5;
+                const leftPt = perspectivePoint(railLeftFront, railLeftBack, depth);
+                const rightPt = perspectivePoint(railRightFront, railRightBack, depth);
+                const scale = 1 - depth * 0.5;
+
+                ctx.strokeStyle = `rgba(${railR}, ${railG}, ${railB}, ${0.85})`;
+                ctx.lineWidth = 5 * scale;
+                ctx.beginPath();
+                ctx.moveTo(leftPt.x, leftPt.y);
+                ctx.lineTo(rightPt.x, rightPt.y);
+                ctx.stroke();
+            }
+
+            // Hanging handles along the rails
+            for (let i = 0; i < 6; i++) {
+                const depth = i / 5;
+                const scale = 1 - depth * 0.5;
+                const yRail = perspectivePoint(railLeftFront, railLeftBack, depth).y;
+                const handleRadius = 10 * scale;
+                const strapLength = 30 * scale;
+
+                // Multiple handles per rail section
+                for (let j = 0; j < 3; j++) {
+                    const lateralPos = (j - 1) / 2;
+                    const leftPt = perspectivePoint(railLeftFront, railLeftBack, depth);
+                    const rightPt = perspectivePoint(railRightFront, railRightBack, depth);
+                    const x = leftPt.x + (rightPt.x - leftPt.x) * (0.5 + lateralPos * 0.4);
+
+                    // Strap
+                    const strapR = Math.floor(railR - 15);
+                    const strapG = Math.floor(railG - 10);
+                    const strapB = Math.floor(railB);
+                    ctx.strokeStyle = `rgba(${strapR}, ${strapG}, ${strapB}, 0.75)`;
+                    ctx.lineWidth = 2 * scale;
+                    ctx.beginPath();
+                    ctx.moveTo(x, yRail);
+                    ctx.lineTo(x, yRail + strapLength);
+                    ctx.stroke();
+
+                    // Handle ring
+                    ctx.fillStyle = `rgb(${railR}, ${railG}, ${railB})`;
+                    ctx.beginPath();
+                    ctx.arc(x, yRail + strapLength + handleRadius, handleRadius, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            // Vertical poles along the aisle following perspective
+            for (let i = 0; i < 3; i++) {
+                const depth = i / 2;
+                const topPt = perspectivePoint(railLeftFront, railLeftBack, depth);
+                const bottomPt = perspectivePoint(floorLeftFront, floorLeftBack, depth);
+                const centerX = (topPt.x + perspectivePoint(railRightFront, railRightBack, depth).x) / 2;
+                const scale = 1 - depth * 0.4;
+
+                ctx.strokeStyle = `rgba(${railR}, ${railG}, ${railB}, 0.85)`;
+                ctx.lineWidth = 8 * scale;
+                ctx.beginPath();
+                ctx.moveTo(centerX, topPt.y);
+                ctx.lineTo(centerX, bottomPt.y);
+                ctx.stroke();
+            }
+
+            // ===== DISTANT DOOR =====
+            const doorR = Math.floor(55 + warmth * 175);
+            const doorG = Math.floor(68 + warmth * 127);
+            const doorB = Math.floor(95 + warmth * 25);
+
+            // Add glow effect with smooth circle animation if all figures interacted
+            if (isDoorGlowing) {
+                // Very slow progress increment
+                doorGlowProgress += 0.002;
+
+                // Calculate sine wave for smooth pulsing (0 to 1 to 0)
+                doorGlowIntensity = Math.sin(doorGlowProgress * Math.PI);
+
+                // Calculate circle radius using sine wave for smooth expansion/contraction
+                const maxRadius = Math.min(canvas.width, canvas.height) * 0.12;
+                const circleRadius = maxRadius * Math.sin(doorGlowProgress * Math.PI);
+
+                // Very bright glow
+                ctx.shadowBlur = 100 + doorGlowIntensity * 120;
+                ctx.shadowColor = `rgba(${Math.min(255, doorR + 100)}, ${Math.min(255, doorG + 100)}, ${Math.min(255, doorB + 80)}, ${doorGlowIntensity})`;
+
+                // Draw additional outer glow
+                const glowGrad = ctx.createRadialGradient(vanishX, vanishY - 30, 0, vanishX, vanishY - 30, 150);
+                glowGrad.addColorStop(0, `rgba(${Math.min(255, doorR + 80)}, ${Math.min(255, doorG + 80)}, ${Math.min(255, doorB + 60)}, ${doorGlowIntensity * 0.6})`);
+                glowGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                ctx.fillStyle = glowGrad;
+                ctx.fillRect(vanishX - 150, vanishY - 150, 300, 200);
+
+                // Draw smooth expanding/contracting circle
+                if (circleRadius > 5) {
+                    ctx.strokeStyle = `rgba(255, 230, 180, ${doorGlowIntensity * 0.8})`;
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.arc(vanishX, vanishY - 20, circleRadius, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+
+                // Reset progress after complete cycle
+                if (doorGlowProgress >= 1) {
+                    doorGlowProgress = 0;
+                }
+            }
+
+            // Door frame
+            const frameR = Math.floor(doorR - 20 + (isDoorGlowing ? doorGlowIntensity * 120 : 0));
+            const frameG = Math.floor(doorG - 20 + (isDoorGlowing ? doorGlowIntensity * 120 : 0));
+            const frameB = Math.floor(doorB - 10 + (isDoorGlowing ? doorGlowIntensity * 80 : 0));
+            ctx.fillStyle = `rgb(${frameR}, ${frameG}, ${frameB})`;
+            ctx.fillRect(vanishX - 50, vanishY - 75, 100, 105);
+
+            // Door panels
+            const panelR = Math.floor(doorR + (isDoorGlowing ? doorGlowIntensity * 150 : 0));
+            const panelG = Math.floor(doorG + (isDoorGlowing ? doorGlowIntensity * 150 : 0));
+            const panelB = Math.floor(doorB + (isDoorGlowing ? doorGlowIntensity * 100 : 0));
+            ctx.fillStyle = `rgb(${Math.min(255, panelR)}, ${Math.min(255, panelG)}, ${Math.min(255, panelB)})`;
+            ctx.fillRect(vanishX - 45, vanishY - 70, 42, 95);
+            ctx.fillRect(vanishX + 3, vanishY - 70, 42, 95);
+
+            // Door window
+            const windowGlowR = Math.floor(windowR + (isDoorGlowing ? doorGlowIntensity * 180 : 0));
+            const windowGlowG = Math.floor(windowG + (isDoorGlowing ? doorGlowIntensity * 180 : 0));
+            const windowGlowB = Math.floor(windowB + (isDoorGlowing ? doorGlowIntensity * 140 : 0));
+            ctx.fillStyle = `rgba(${Math.min(255, windowGlowR)}, ${Math.min(255, windowGlowG)}, ${Math.min(255, windowGlowB)}, ${Math.min(1, windowAlpha + (isDoorGlowing ? 0.5 : 0))})`;
+            ctx.fillRect(vanishX - 35, vanishY - 60, 70, 40);
+
+            // Reset shadow
+            ctx.shadowBlur = 0;
+            ctx.shadowColor = 'transparent';
+
+            // ===== ATMOSPHERIC EFFECTS =====
+            const vignetteStrength = 0.4 - warmth * 0.3;
+            const vignette = ctx.createRadialGradient(vanishX, vanishY, 0, vanishX, vanishY, w);
+            vignette.addColorStop(0, 'rgba(0, 0, 0, 0)');
+            vignette.addColorStop(1, `rgba(0, 0, 0, ${vignetteStrength})`);
+            ctx.fillStyle = vignette;
+            ctx.fillRect(0, 0, w, h);
+        }
+
+        // Draw a humanoid figure
+        function drawFigure(figure) {
+            const w = canvas.width;
+            const h = canvas.height;
+            const x = w * figure.x;
+            const y = h * figure.y;
+            const baseSize = 100 * figure.scale;
+
+            // Calculate brightness
+            let brightness = figure.brightness;
+            if (hoveredFigure === figure && !isInteracting) {
+                brightness = Math.min(brightness + 0.15, 0.95);
+            }
+
+            // Color transition
+            const warmth = brightness;
+
+            const r = Math.floor(30 + warmth * 220);
+            const g = Math.floor(40 + warmth * 205);
+            const b = Math.floor(70 + warmth * 165);
+
+            ctx.save();
+            ctx.translate(x, y);
+
+            // Add glow for bright figures
+            if (brightness > 0.5) {
+                ctx.shadowBlur = 30 + brightness * 40;
+                ctx.shadowColor = `rgba(${r}, ${g}, ${b}, ${0.6 + brightness * 0.4})`;
+            } else if (hoveredFigure === figure && !isInteracting) {
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = `rgba(${r}, ${g}, ${b}, 0.4)`;
+            }
+
+            // Body
+            const bodyOpacity = 0.9 + brightness * 0.1;
+            ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${bodyOpacity})`;
+            ctx.beginPath();
+            ctx.ellipse(0, 0, baseSize * 0.25, baseSize * 0.45, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Head
+            ctx.beginPath();
+            ctx.arc(0, -baseSize * 0.55, baseSize * 0.2, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Arms
+            const armR = Math.floor(r * 0.95);
+            const armG = Math.floor(g * 0.95);
+            const armB = Math.floor(b * 0.95);
+            ctx.fillStyle = `rgba(${armR}, ${armG}, ${armB}, ${bodyOpacity * 0.85})`;
+            // Left arm
+            ctx.beginPath();
+            ctx.ellipse(-baseSize * 0.22, baseSize * 0.05, baseSize * 0.12, baseSize * 0.35, -0.3, 0, Math.PI * 2);
+            ctx.fill();
+            // Right arm
+            ctx.beginPath();
+            ctx.ellipse(baseSize * 0.22, baseSize * 0.05, baseSize * 0.12, baseSize * 0.35, 0.3, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Add detail based on brightness
+            if (brightness > 0.4) {
+                const shoulderR = Math.floor(r + 5);
+                const shoulderG = Math.floor(g + 5);
+                const shoulderB = Math.floor(b + 5);
+                ctx.fillStyle = `rgba(${shoulderR}, ${shoulderG}, ${shoulderB}, ${0.7 + brightness * 0.3})`;
+                ctx.beginPath();
+                ctx.ellipse(0, -baseSize * 0.3, baseSize * 0.28, baseSize * 0.15, 0, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Very bright figures get extra highlight/glow effect
+            if (brightness > 0.65) {
+                const glowR = Math.floor(Math.min(255, r + 5));
+                const glowG = Math.floor(Math.min(255, g + 10));
+                const glowB = Math.floor(Math.min(255, b + 20));
+                const glowGrad = ctx.createRadialGradient(0, -baseSize * 0.2, 0, 0, -baseSize * 0.2, baseSize * 0.6);
+                glowGrad.addColorStop(0, `rgba(${glowR}, ${glowG}, ${glowB}, ${(brightness - 0.65) * 0.8})`);
+                glowGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                ctx.fillStyle = glowGrad;
+                ctx.beginPath();
+                ctx.arc(0, -baseSize * 0.2, baseSize * 0.6, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Darker figures get unsettling proportions
+            if (brightness < 0.25 && figure.interacted) {
+                ctx.globalAlpha = 0.5;
+                const darkR = Math.floor(r * 0.6);
+                const darkG = Math.floor(g * 0.6);
+                const darkB = Math.floor(b * 1.1);
+                ctx.fillStyle = `rgba(${darkR}, ${darkG}, ${darkB}, 0.8)`;
+                ctx.beginPath();
+                ctx.ellipse(0, baseSize * 0.1, baseSize * 0.2, baseSize * 0.5, 0, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            ctx.restore();
+        }
+
+        // Check if mouse is over a figure or door
+        function checkHover() {
+            if (isInteracting || isOverTextBox) {
+                return;
+            }
+
+            const w = canvas.width;
+            const h = canvas.height;
+            const vanishX = w * 0.5;
+            const vanishY = h * 0.45;
+
+            // Check door hover first (if glowing)
+            if (isDoorGlowing) {
+                const doorLeft = vanishX - 50;
+                const doorRight = vanishX + 50;
+                const doorTop = vanishY - 75;
+                const doorBottom = vanishY + 30;
+
+                if (mouseX >= doorLeft && mouseX <= doorRight &&
+                    mouseY >= doorTop && mouseY <= doorBottom) {
+                    canvas.style.cursor = 'pointer';
+                    return;
+                }
+            }
+
+            // Check figure hover
+            let foundHover = false;
+
+            for (let figure of figures) {
+                if (figure.interacted) continue;
+
+                const x = w * figure.x;
+                const y = h * figure.y;
+                const size = 100 * figure.scale;
+
+                const dx = mouseX - x;
+                const dy = mouseY - y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+
+                if (dist < size * 0.5) {
+                    if (hoveredFigure !== figure) {
+                        hoveredFigure = figure;
+                        showTextBox(figure);
+                    }
+                    canvas.style.cursor = 'pointer';
+                    foundHover = true;
+                    break;
+                }
+            }
+
+            if (!foundHover) {
+                canvas.style.cursor = 'default';
+                if (hoveredFigure) {
+                    hoveredFigure = null;
+                    hideTextBox();
+                }
+            }
+        }
+
+        // Show text box
+        function showTextBox(figure) {
+            document.getElementById('narrativeText').textContent = figure.narrative;
+            document.getElementById('questionText').textContent = figure.question;
+
+            const responsesContainer = document.getElementById('responsesContainer');
+            responsesContainer.innerHTML = '';
+
+            figure.responses.forEach((response, index) => {
+                const option = document.createElement('div');
+                option.className = 'response-option';
+                option.textContent = response.text;
+                option.addEventListener('click', () => handleResponse(figure, index));
+                responsesContainer.appendChild(option);
+            });
+
+            // Position text box over the figure
+            const w = canvas.width;
+            const h = canvas.height;
+            const figureX = w * figure.x;
+            const figureY = h * figure.y;
+
+            // Center the text box over the figure, slightly above
+            let boxX = figureX - 200;
+            let boxY = figureY - 250;
+
+            // Prevent text box from going off-screen horizontally
+            const textBoxWidth = 400;
+            if (boxX < 20) {
+                boxX = 20;
+            } else if (boxX + textBoxWidth > w - 20) {
+                boxX = w - textBoxWidth - 20;
+            }
+
+            // Prevent text box from going off-screen vertically
+            if (boxY < 20) {
+                boxY = 20;
+            }
+
+            textOverlay.style.left = boxX + 'px';
+            textOverlay.style.top = boxY + 'px';
+            textOverlay.classList.add('visible');
+        }
+
+        // Hide text box
+        function hideTextBox() {
+            textOverlay.classList.remove('visible');
+        }
+
+        // Handle response selection
+        function handleResponse(figure, responseIndex) {
+            isInteracting = true;
+            hideTextBox();
+
+            const response = figure.responses[responseIndex];
+            figure.interacted = true;
+            totalChoices++;
+
+            // Update figure brightness
+            if (response.positive) {
+                positiveChoices++;
+                figure.brightness = Math.min(figure.brightness + 0.35, 0.85);
+            } else {
+                figure.brightness = Math.max(figure.brightness - 0.12, 0.08);
+            }
+
+            // Check if all done
+            const allDone = figures.every(fig => fig.interacted);
+            if (allDone && !allFiguresInteracted) {
+                allFiguresInteracted = true;
+                isDoorGlowing = true;
+                doorGlowProgress = 0;
+            }
+
+            // Update environment brightness
+            const positiveRatio = positiveChoices / 5;
+            const targetBrightness = 0.15 + (positiveRatio * 0.85);
+
+            // Animate brightness transition
+            const startBrightness = environmentBrightness;
+            const duration = 2500;
+            const startTime = Date.now();
+
+            function animateBrightness() {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const easeProgress = 1 - Math.pow(1 - progress, 3);
+                environmentBrightness = startBrightness + (targetBrightness - startBrightness) * easeProgress;
+
+                if (progress < 1) {
+                    requestAnimationFrame(animateBrightness);
+                } else {
+                    isInteracting = false;
+                }
+            }
+
+            animateBrightness();
+        }
+
+        // Transition to next cabin with slow fade effect
+        function transitionToNextCabin() {
+            isTransitioningCabins = true;
+            isDoorGlowing = false;
+            doorGlowProgress = 0;
+
+            const w = canvas.width;
+            const h = canvas.height;
+            const vanishX = w * 0.5;
+            const vanishY = h * 0.45;
+
+            // Center of door
+            const centerX = vanishX;
+            const centerY = vanishY - 30;
+
+            // Phase 1: Slow fade to black with expanding circle
+            const phase1Duration = 2000; // Increased from 800 to 2000ms
+            const phase1Start = Date.now();
+
+            // Generate new cabin figures with different positions
+            currentCabin++;
+            const newFigures = generateFigures(currentCabin);
+
+            function phase1FadeOut() {
+                const elapsed = Date.now() - phase1Start;
+                const progress = Math.min(elapsed / phase1Duration, 1);
+                // Smooth ease out for gentle fade
+                const easeProgress = 1 - Math.pow(1 - progress, 3);
+
+                // Draw the scene normally first
+                drawTrainInterior();
+                figures.forEach(fig => drawFigure(fig));
+
+                // Calculate fade opacity - gradually increases
+                const fadeOpacity = easeProgress;
+
+                // Draw expanding black circle that fades in
+                const maxRadius = Math.max(w, h) * 1.5;
+                const currentRadius = maxRadius * easeProgress;
+
+                // Fade to black with expanding circle
+                ctx.fillStyle = `rgba(0, 0, 0, ${fadeOpacity})`;
+                ctx.fillRect(0, 0, w, h);
+
+                if (progress < 1) {
+                    requestAnimationFrame(phase1FadeOut);
+                } else {
+                    // Switch to new cabin
+                    figures = newFigures;
+                    allFiguresInteracted = false;
+                    totalChoices = 0;
+                    positiveChoices = 0;
+                    hoveredFigure = null;
+                    environmentBrightness = Math.max(0.15, environmentBrightness * 0.3);
+
+                    // Phase 2: Slow fade in from black
+                    phase2FadeIn();
+                }
+            }
+
+            function phase2FadeIn() {
+                const phase2Duration = 2000; // Increased from 800 to 2000ms
+                const phase2Start = Date.now();
+
+                function animate() {
+                    const elapsed = Date.now() - phase2Start;
+                    const progress = Math.min(elapsed / phase2Duration, 1);
+                    // Smooth ease in for gentle reveal
+                    const easeProgress = Math.pow(progress, 2);
+
+                    // Draw new scene
+                    drawTrainInterior();
+                    figures.forEach(fig => drawFigure(fig));
+
+                    // Calculate fade opacity - gradually decreases
+                    const fadeOpacity = 1 - easeProgress;
+
+                    // Fade from black
+                    ctx.fillStyle = `rgba(0, 0, 0, ${fadeOpacity})`;
+                    ctx.fillRect(0, 0, w, h);
+
+                    if (progress < 1) {
+                        requestAnimationFrame(animate);
+                    } else {
+                        isTransitioningCabins = false;
+                    }
+                }
+                animate();
+            }
+
+            phase1FadeOut();
+        }
+
+        // Main animation loop
+        function animate() {
+            drawTrainInterior();
+
+            // Draw all figures
+            figures.forEach(figure => {
+                drawFigure(figure);
+            });
+
+            checkHover();
+            requestAnimationFrame(animate);
+        }
+
+        // Start
+        animate();
+    </script>
 </body>
 </html>
